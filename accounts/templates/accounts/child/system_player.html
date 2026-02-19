@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-soft-pink">
+    <div class="container py-5">
+        <div id="game-stage" class="card border-0 shadow-lg rounded-5 p-4 p-lg-5 bg-white text-center">
+            
+            <div class="mb-4">
+                <h1 class="display-5 fw-bold text-pink" id="game-title">Loading Activity...</h1>
+                <p class="text-muted fs-5" id="game-instruction">Follow the instructions on the screen.</p>
+            </div>
+
+            <div id="activity-container" class="d-flex flex-wrap justify-content-center align-items-center gap-4 py-4 mb-4 min-vh-50">
+                </div>
+
+            <div id="victory-ui" class="d-none animate__animated animate__bounceIn">
+                <div class="py-4">
+                    <h1 class="display-1 text-warning mb-3">⭐ ⭐ ⭐</h1>
+                    <h2 class="display-4 fw-bold text-success">EXCELLENT WORK!</h2>
+                    <p class="fs-4 text-muted">Progress report sent to Parent Dashboard.</p>
+                </div>
+                <div class="d-grid gap-3 d-sm-flex justify-content-center">
+                    <a href="{% url 'complete_activity' assignment.id %}" class="btn btn-success btn-lg rounded-pill px-5 py-3 fw-bold shadow">
+                        FINISH ACTIVITY
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-4 border-top">
+                <a href="{% url 'exit_child_gate' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fas fa-lock me-2"></i>Parent Exit
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mediaUrl = "{{ lesson.file.url }}";
+    const activityType = "{{ lesson.activity_type }}";
+    const container = document.getElementById('activity-container');
+    const title = document.getElementById('game-title');
+    const instruction = document.getElementById('game-instruction');
+
+    // --- ACTIVITY 1: CARD SHUFFLE (Discovery) ---
+    function initShuffling() {
+        title.innerText = "🃏 Card Discovery";
+        instruction.innerText = "Tap all the cards to see what's underneath!";
+        let found = 0;
+        const total = 4;
+
+        for(let i=0; i<total; i++) {
+            const card = document.createElement('div');
+            card.className = "game-card bg-pink rounded-4 shadow d-flex align-items-center justify-content-center cursor-pointer";
+            card.style.width = "140px"; card.style.height = "180px";
+            card.innerHTML = `<img src="${mediaUrl}" class="img-fluid rounded-3 d-none">`;
+            
+            card.onclick = () => {
+                if(!card.classList.contains('revealed')) {
+                    card.classList.add('revealed', 'bg-white', 'border-pink');
+                    card.querySelector('img').classList.remove('d-none');
+                    found++;
+                    if(found === total) setTimeout(checkVictory, 800);
+                }
+            };
+            container.appendChild(card);
+        }
+    }
+
+    // --- ACTIVITY 2: MATCHING (Visual IQ) ---
+    function initMatching() {
+        title.innerText = "🧩 Matching Pairs";
+        instruction.innerText = "Find the identical images!";
+        [1, 2].forEach(() => {
+            const item = document.createElement('div');
+            item.className = "p-3 bg-white border-2 border-pink rounded-4 shadow-sm cursor-pointer";
+            item.innerHTML = `<img src="${mediaUrl}" style="width: 150px;">`;
+            item.onclick = () => {
+                item.classList.add('bg-success-light', 'animate__animated', 'animate__pulse');
+                setTimeout(checkVictory, 800);
+            };
+            container.appendChild(item);
+        });
+    }
+
+    // --- ACTIVITY 3: SEQUENCING (Logic) ---
+    function initSequencing() {
+        title.innerText = "🔢 Ordering Task";
+        instruction.innerText = "Tap the numbers in the correct order (1 -> 2 -> 3)";
+        let step = 1;
+        [2, 1, 3].forEach(num => {
+            const btn = document.createElement('div');
+            btn.className = "btn btn-outline-pink fs-1 fw-bold rounded-circle d-flex align-items-center justify-content-center shadow";
+            btn.style.width = "100px"; btn.style.height = "100px";
+            btn.innerText = num;
+            btn.onclick = () => {
+                if(num === step) {
+                    btn.className = "btn btn-success fs-1 fw-bold rounded-circle d-flex align-items-center justify-content-center shadow";
+                    step++;
+                    if(step > 3) setTimeout(checkVictory, 800);
+                } else {
+                    btn.classList.add('animate__animated', 'animate__headShake');
+                    setTimeout(() => btn.classList.remove('animate__animated', 'animate__headShake'), 500);
+                }
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    // --- ACTIVITY 4: DRAG & DROP (Motor Skills) ---
+    function initDragDrop() {
+        title.innerText = "🖱️ Sort the Object";
+        instruction.innerText = "Drag the item into the box!";
+        
+        const dragItem = document.createElement('img');
+        dragItem.src = mediaUrl; dragItem.className = "img-fluid rounded-4 shadow cursor-grab";
+        dragItem.style.width = "180px"; dragItem.draggable = true;
+
+        const dropZone = document.createElement('div');
+        dropZone.className = "border-4 border-dashed border-pink rounded-4 d-flex align-items-center justify-content-center bg-light";
+        dropZone.style.width = "220px"; dropZone.style.height = "220px";
+        dropZone.innerHTML = "<p class='text-muted fw-bold'>TARGET</p>";
+
+        dragItem.ondragstart = (e) => e.dataTransfer.setData("text", "ok");
+        dropZone.ondragover = (e) => e.preventDefault();
+        dropZone.ondrop = (e) => {
+            dropZone.innerHTML = ""; dropZone.appendChild(dragItem);
+            dropZone.style.borderStyle = "solid"; dropZone.classList.add('border-success');
+            setTimeout(checkVictory, 1000);
+        };
+        container.appendChild(dragItem);
+        container.appendChild(dropZone);
+    }
+
+    function checkVictory() {
+        container.classList.add('d-none');
+        title.classList.add('d-none');
+        instruction.classList.add('d-none');
+        document.getElementById('victory-ui').classList.remove('d-none');
+    }
+
+    window.onload = () => {
+        if (activityType === 'shuffling') initShuffling();
+        else if (activityType === 'matching') initMatching();
+        else if (activityType === 'sequencing') initSequencing();
+        else if (activityType === 'drag_drop') initDragDrop();
+        else {
+            title.innerText = "{{ lesson.title }}";
+            container.innerHTML = `<img src="${mediaUrl}" class="img-fluid rounded-4 shadow">`;
+        }
+    };
+</script>
+
+<style>
+    .bg-soft-pink { background-color: #fce4ec; }
+    .bg-success-light { background-color: #e8f5e9; }
+    .text-pink { color: #f06292; }
+    .border-pink { border-color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; }
+    .btn-outline-pink { border-color: #f06292; color: #f06292; }
+    .btn-outline-pink:hover { background-color: #fce4ec; color: #f06292; }
+    .game-card { transition: 0.3s; }
+    .game-card.revealed { transform: rotateY(180deg); }
+    .cursor-grab { cursor: grab; }
+</style>
+{% endblock %}

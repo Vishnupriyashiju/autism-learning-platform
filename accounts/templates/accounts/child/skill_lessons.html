@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark">{{ skill_name }} Lessons</h2>
+            <p class="text-muted">Assigned to: {{ child.name }}</p>
+        </div>
+        <a href="{% url 'skill_selection_portal' child.id %}" class="btn btn-outline-pink rounded-pill px-4">Change Skill</a>
+    </div>
+
+    <div class="row g-4">
+        {% for lesson in lessons %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <img src="{{ lesson.thumbnail.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold">{{ lesson.title }}</h5>
+                    <p class="small text-muted mb-4">{{ lesson.get_difficulty_level_display }} Level</p>
+                    <a href="{% url 'system_activity_player' lesson.id %}" class="btn btn-pink w-100 rounded-pill fw-bold">START LESSON</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h4 class="text-muted">No lessons available for this skill yet.</h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

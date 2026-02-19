@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="fas fa-layer-group text-pink me-2"></i>Difficulty Levels</h2>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary rounded-pill btn-sm">Back to Dashboard</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 border-top border-success border-4">
+                <h5 class="fw-bold text-success">Beginner</h5>
+                <p class="small text-muted">Focus on basic motor skills, single-object matching, and simple sensory input.</p>
+                <button class="btn btn-sm btn-light w-100 rounded-pill mt-auto">Edit Benchmarks</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 border-top border-warning border-4">
+                <h5 class="fw-bold text-warning">Intermediate</h5>
+                <p class="small text-muted">Includes sequencing tasks, multi-step directions, and moderate interactive play.</p>
+                <button class="btn btn-sm btn-light w-100 rounded-pill mt-auto">Edit Benchmarks</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 border-top border-danger border-4">
+                <h5 class="fw-bold text-danger">Advanced</h5>
+                <p class="small text-muted">Complex logic puzzles, social scenario simulations, and high-engagement tasks.</p>
+                <button class="btn btn-sm btn-light w-100 rounded-pill mt-auto">Edit Benchmarks</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

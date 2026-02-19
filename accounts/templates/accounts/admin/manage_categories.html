@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold text-dark"><i class="fas fa-tags text-pink me-2"></i>Skill Categories</h4>
+            <button class="btn btn-pink rounded-pill btn-sm px-4">Add New Category</button>
+        </div>
+        
+        <div class="list-group list-group-flush">
+            {% for category in categories %}
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 border-bottom">
+                    <span class="fw-bold text-dark">{{ category|title }}</span>
+                    <div>
+                        <button class="btn btn-sm btn-light rounded-pill px-3">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Delete</button>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-4 text-muted">No categories defined. Add your first one to start organizing lessons.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-lg rounded-4 p-5 bg-white text-center">
+                <h2 class="text-pink fw-bold mb-4">Daily Readiness Check: {{ child.name }} 📝</h2>
+                <p class="text-muted mb-4">Answer these 5 questions to calculate the current autism percentage/sensitivity level.</p>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="text-start mb-4">
+                        {% with questions="Is the child seeking high sensory input today?,Does the child seem unusually restless?,Is there difficulty maintaining eye contact?,Is the child showing signs of over-stimulation?,Is the child resistant to standard routine today?" %}
+                        {% for q in questions.split|slice:":5" %}
+                        <div class="mb-4 p-3 bg-light rounded-4">
+                            <p class="fw-bold mb-2">Q{{ forloop.counter }}: {{ q }}</p>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" name="q{{ forloop.counter }}" value="yes" class="btn-check" id="q{{ forloop.counter }}y" required>
+                                <label class="btn btn-outline-pink" for="q{{ forloop.counter }}y">Yes (High Sensitivity)</label>
+                                
+                                <input type="radio" name="q{{ forloop.counter }}" value="no" class="btn-check" id="q{{ forloop.counter }}n">
+                                <label class="btn btn-outline-pink" for="q{{ forloop.counter }}n">No (Calm)</label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+                    <button type="submit" class="btn btn-pink w-100 rounded-pill py-3 fw-bold shadow">
+                        CALCULATE READINESS & PROCEED
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

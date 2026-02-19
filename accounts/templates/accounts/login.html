@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <style>
+        body {
+            background: url("{% static 'img/about.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container d-flex align-items-center justify-content-center" style="min-height:100vh;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+
+                    <h4 class="text-center mb-4">Login</h4>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <input type="text" name="username" class="form-control mb-3"
+                               placeholder="Username" required>
+
+                        <input type="password" name="password" class="form-control mb-3"
+                               placeholder="Password" required>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            Login
+                        </button>
+                    </form>
+
+                    <!-- Extra options -->
+                    <div class="text-center">
+                        <a href="#" class="d-block mb-2 text-decoration-none">
+                            Forgot password?
+                        </a>
+
+                        <span class="text-muted">Don’t have an account?</span>
+                        <a href="{% url 'register' %}" class="text-decoration-none">
+                            Create account
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

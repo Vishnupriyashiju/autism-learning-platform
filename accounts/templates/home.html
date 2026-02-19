@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-5 mb-5 hero-header" 
+     style="background: url('{% static 'img/hero-img.jpg' %}') center center no-repeat; 
+            background-size: cover; 
+            min-height: 85vh;
+            display: flex;
+            align-items: center;">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-7 col-md-12 text-start">
+                <h4 class="text-white mb-4 fw-bold animate__animated animate__fadeInDown" 
+                    style="letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.4);">
+                    NEURO-INCLUSIVE LEARNING
+                </h4>
+                <h1 class="display-1 text-white mb-5 animate__animated animate__fadeInLeft" 
+                    style="font-weight: 700; text-shadow: 2px 2px 8px rgba(0,0,0,0.6);">
+                    Empowering Bright Futures for Every Child
+                </h1>
+                <div class="d-flex align-items-center animate__animated animate__fadeInUp">
+                    <a href="{% url 'register' %}" class="btn btn-pink px-4 py-3 px-md-5 me-4 shadow">Get Started</a>
+                    <a href="#about" class="btn btn-pink px-4 py-3 px-md-5 shadow-sm">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid py-5 bg-white" id="about">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-5">
+                <div class="rounded-4 overflow-hidden shadow-lg">
+                    <img src="{% static 'img/about.jpg' %}" class="img-fluid w-100" alt="About Image">
+                </div>
+            </div>
+            <div class="col-lg-7 text-start">
+                <h4 class="text-pink mb-4 border-bottom border-pink border-2 d-inline-block p-2">About Us</h4>
+                <h1 class="text-dark mb-4">A Smart Way to Build Brighter Futures</h1>
+                <p class="text-dark">NeuroSkills is an advanced learning portal specifically designed for children with Autism and ADHD. Our platform focuses on skill development through sensory-friendly environments.</p>
+                <div class="row mb-4">
+                    <div class="col-lg-6">
+                        <h6 class="mb-3 text-dark"><i class="fas fa-check-circle me-2 text-pink"></i>Social Skills Development</h6>
+                        <h6 class="mb-3 text-dark"><i class="fas fa-check-circle me-2 text-pink"></i>Cognitive Games</h6>
+                    </div>
+                    <div class="col-lg-6">
+                        <h6 class="mb-3 text-dark"><i class="fas fa-check-circle me-2 text-pink"></i>Sensory-Friendly UI</h6>
+                        <h6 class="mb-3 text-dark"><i class="fas fa-check-circle me-2 text-pink"></i>Progress Reports</h6>
+                    </div>
+                </div>
+                <a href="#" class="btn btn-pink px-5 py-3">More Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid py-5 bg-soft-pink" id="services">
+    <div class="container py-5">
+        <div class="mx-auto text-center mb-5" style="max-width: 700px;">
+            <h4 class="text-pink mb-4 border-bottom border-pink border-2 d-inline-block p-2 title-border-radius">What We Do</h4>
+            <h1 class="display-5 text-dark">Comprehensive Support for Every Learner</h1>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 border-0 rounded-4 bg-white shadow-sm h-100">
+                    <i class="fas fa-brain fa-3x text-pink mb-3"></i>
+                    <h4 class="text-dark">Skill Building</h4>
+                    <p class="small text-muted">Interactive lessons focusing on communication and motor skills development.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 border-0 rounded-4 bg-white shadow-sm h-100">
+                    <i class="fas fa-chart-line fa-3x text-pink mb-3"></i>
+                    <h4 class="text-dark">Auto Tracking</h4>
+                    <p class="small text-muted">The system automatically tracks data to generate progress reports for parents.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 border-0 rounded-4 bg-white shadow-sm h-100">
+                    <i class="fas fa-user-shield fa-3x text-pink mb-3"></i>
+                    <h4 class="text-dark">Parent Portal</h4>
+                    <p class="small text-muted">A decision-making hub for parents to plan schedules and monitor consistency.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 border-0 rounded-4 bg-white shadow-sm h-100">
+                    <i class="fas fa-palette fa-3x text-pink mb-3"></i>
+                    <h4 class="text-dark">Sensory UI</h4>
+                    <p class="small text-muted">Low-stimulus designs and calm colors to prevent sensory overload.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid py-5 bg-white" id="contact">
+    <div class="container py-5">
+        <div class="mx-auto text-center mb-5" style="max-width: 700px;">
+            <h4 class="text-pink mb-4 border-bottom border-pink border-2 d-inline-block p-2 title-border-radius">Contact Us</h4>
+            <h1 class="display-5 text-dark">Get In Touch With Our Team</h1>
+        </div>
+        <div class="row g-5">
+            <div class="col-lg-6">
+                <div class="bg-soft-pink p-5 rounded-4 h-100">
+                    <h4 class="text-dark mb-4">Contact Information</h4>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-map-marker-alt text-pink me-3 fa-2x"></i>
+                        <div>
+                            <h6 class="mb-0">Location</h6>
+                            <small>Muvattupuzha, Kerala, India</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-envelope text-pink me-3 fa-2x"></i>
+                        <div>
+                            <h6 class="mb-0">Email Us</h6>
+                            <small>info@neuroskills.com</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-phone-alt text-pink me-3 fa-2x"></i>
+                        <div>
+                            <h6 class="mb-0">Call Us</h6>
+                            <small>+91 123 456 7890</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <form class="p-4 border rounded-4 bg-light shadow-sm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control border-0 py-3" placeholder="Your Name">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="email" class="form-control border-0 py-3" placeholder="Your Email">
+                        </div>
+                        <div class="col-12">
+                            <input type="text" class="form-control border-0 py-3" placeholder="Subject">
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control border-0 py-3" rows="4" placeholder="Message"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-pink w-100 py-3" type="submit">Send Message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

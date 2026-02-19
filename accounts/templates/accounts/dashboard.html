@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+
+    <h1>Welcome to Dashboard</h1>
+
+    <p>Hello, <strong>{{ request.user.first_name }}</strong></p>
+
+    <p>Email: {{ request.user.email }}</p>
+    <p>Role: {{ request.user.role }}</p>
+
+    <hr>
+
+    <a href="{% url 'logout' %}">Logout</a> 
+
+</body>
+</html>

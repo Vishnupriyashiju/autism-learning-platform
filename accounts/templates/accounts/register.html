@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Account</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url("{% static 'img/background.jpg' %}") no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .register-card {
+            background: #ffffff;
+            width: 420px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border-top: 6px solid #ff69b4;
+        }
+
+        .register-card h3 {
+            text-align: center;
+            color: #ff1493;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .register-card input,
+        .register-card select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .register-card input:focus,
+        .register-card select:focus {
+            outline: none;
+            border-color: #ff69b4;
+            box-shadow: 0 0 6px rgba(255, 105, 180, 0.5);
+        }
+
+        .register-card button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .register-card button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .register-card p {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .register-card a {
+            color: #ff1493;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .register-card a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="register-card">
+    <h3>Create Account</h3>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <input type="text" name="full_name" placeholder="Full Name" required>
+
+        <input type="email" name="email" placeholder="Email Address" required>
+
+        <input type="tel" name="phone" placeholder="Phone Number" required>
+
+        <input type="date" name="dob">
+
+        <select name="role" required>
+            <option value="">Select Role</option>
+            <option value="PARENT">Parent</option>
+            <option value="CONTRIBUTOR">Contributor</option>
+        </select>
+
+        <input type="password" name="password" placeholder="Password" required>
+
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+
+        <button type="submit">Create Account</button>
+    </form>
+
+    <p>
+        Already have an account?
+        <a href="{% url 'login' %}">Login</a>
+    </p>
+</div>
+
+</body>
+</html>

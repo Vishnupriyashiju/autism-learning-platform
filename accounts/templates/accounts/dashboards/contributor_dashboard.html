@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-5 bg-soft-pink mb-5">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-5 text-dark fw-bold"> Contributor Studio</h1>
+            <p class="text-pink fw-bold">Design lessons. Receive feedback. Track impact.</p>
+        </div>
+        <a href="{% url 'upload_lesson' %}" class="btn btn-pink px-4 py-2 rounded-pill shadow">+ Create Content</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4 mb-5 text-center">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white">
+                <h3 class="text-pink fw-bold mb-0">{{ total_views }}</h3>
+                <small class="text-muted fw-bold">TOTAL VIEWS</small>
+            </div>
+        </div>
+        <div class="col-md-3 text-success">
+            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white">
+                <h3 class="fw-bold mb-0">{{ approved_count }}</h3>
+                <small class="text-muted fw-bold">LIVE CONTENT</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white d-flex flex-row align-items-center justify-content-start">
+                <div class="bg-soft-pink p-2 rounded-circle me-3"><i class="fas fa-comment-dots text-pink"></i></div>
+                <div class="text-start">
+                    <h6 class="mb-0 fw-bold">Latest Feedback</h6>
+                    <small class="text-muted">You have {{ feedback_items.count }} items to review.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Title & Type</th>
+                        <th>Activity Mode</th>
+                        <th>Status</th>
+                        <th>Admin Feedback</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in lessons %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="fw-bold text-dark d-block">{{ item.title }}</span>
+                            <small class="text-muted">{{ item.get_content_type_display }}</small>
+                        </td>
+                        <td><span class="text-muted">{{ item.get_activity_type_display }}</span></td>
+                        <td>
+                            {% if item.is_approved %}
+                            <span class="badge bg-success rounded-pill px-3">Approved</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="small text-truncate" style="max-width: 200px;">
+                            {{ item.admin_feedback|default:"No feedback yet." }}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="#" class="btn btn-outline-pink btn-sm rounded-pill">Update</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="card border-0 shadow-sm rounded-4 mt-5">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold text-dark mb-0">Admin Feedback & Improvements</h5>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for lesson in feedback_items %}
+        <div class="list-group-item p-4">
+            <h6 class="fw-bold text-pink">{{ lesson.title }}</h6>
+            <p class="mb-0 text-muted italic">"{{ lesson.admin_feedback }}"</p>
+            <a href="{% url 'upload_lesson' %}" class="btn btn-sm btn-outline-pink mt-2">Update Content</a>
+        </div>
+        {% empty %}
+        <div class="p-4 text-center text-muted">No improvement feedback yet.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

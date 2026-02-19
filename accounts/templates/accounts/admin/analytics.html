@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="fas fa-chart-line text-pink me-2"></i>Platform Analytics</h2>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary rounded-pill btn-sm">Back to Dash</a>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-center">
+                <h1 class="display-4 fw-bold text-pink">{{ total_lessons }}</h1>
+                <p class="text-muted text-uppercase small fw-bold">Total Lessons</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-center">
+                <h1 class="display-4 fw-bold text-success">{{ completed_tasks }}</h1>
+                <p class="text-muted text-uppercase small fw-bold">Activities Completed</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-center">
+                <h1 class="display-4 fw-bold text-info">{{ total_assignments }}</h1>
+                <p class="text-muted text-uppercase small fw-bold">Total Assignments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h5 class="fw-bold mb-3">⭐ Top Performing Lesson</h5>
+        {% if top_lesson %}
+            <div class="d-flex align-items-center p-3 bg-light rounded-4">
+                <div class="flex-grow-1">
+                    <h6 class="mb-1 fw-bold">{{ top_lesson.title }}</h6>
+                    <small class="text-muted">By {{ top_lesson.contributor.first_name }}</small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-pink rounded-pill px-3">{{ top_lesson.views_count }} Views</span>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-muted">No data available yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

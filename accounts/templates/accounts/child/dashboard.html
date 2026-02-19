@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center 
+     {% if child.sensory_mode == 'low' %}bg-light{% else %}bg-soft-pink{% endif %}">
+    
+    <div class="text-center p-5 rounded-5 shadow-lg bg-white border-4 border-pink" style="max-width: 600px;">
+        <h1 class="display-3 fw-bold text-dark mb-4">Hello, {{ child.name }}! 👋</h1>
+        
+        {% if task %}
+            <div class="mb-5">
+                <p class="fs-4 text-muted mb-2">Today's Personalized Goal:</p>
+                <h2 class="display-6 fw-bold text-pink mb-4">{{ task.lesson.title }}</h2>
+                
+                <a href="{{ task.lesson.file.url }}" class="btn btn-pink btn-lg rounded-pill px-5 py-3 fs-3 shadow animate__animated animate__pulse animate__infinite">
+                    START LESSON 🎮
+                </a>
+            </div>
+        {% else %}
+            <div class="py-5">
+                <i class="fas fa-star fa-5x text-warning mb-3"></i>
+                <h2 class="text-success fw-bold">Daily Goal Completed!</h2>
+                <p class="text-muted">Wait for your parent to assign a new activity.</p>
+            </div>
+        {% endif %}
+
+        <hr class="my-4">
+        <a href="{% url 'exit_child_gate' %}" class="btn btn-outline-secondary rounded-pill px-4">
+            Exit Kid's Corner
+        </a>
+    </div>
+</div>
+
+<style>
+    .bg-soft-pink { background-color: #fce4ec; }
+    .btn-pink { background-color: #f06292; border: none; color: white; }
+    .btn-pink:hover { background-color: #ec407a; color: white; }
+</style>
+{% endblock %}
