@@ -3,6 +3,12 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
+            <div class="mb-4">
+                <a href="{% url 'role_dashboard' %}" class="btn btn-light rounded-pill px-4">
+                    <i class="fas fa-chevron-left me-2"></i>Back to Controller Dashboard
+                </a>
+            </div>
+
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white py-4 px-4 border-bottom">
                     <h4 class="fw-bold text-dark mb-0"><i class="fas fa-cogs text-pink me-2"></i>Platform Configuration</h4>
@@ -13,25 +19,26 @@
                         <h6 class="fw-bold text-pink mb-3">Sensory Mode Thresholds</h6>
                         <div class="mb-4 p-3 bg-light rounded-4">
                             <div class="form-check form-switch mb-2">
-                                <input class="form-check-form-switch" type="checkbox" id="autoDim" checked>
+                                <input class="form-check-input" type="checkbox" id="autoDim" checked>
                                 <label class="form-check-label ms-2 fw-bold" for="autoDim">Auto-Dim High Stimulation</label>
                             </div>
-                            <small class="text-muted d-block mb-3">Automatically lower brightness and saturation for children in "Sensitive" mood.</small>
-                            
-                            <label class="form-label small fw-bold">Maximum Animation Speed (Seconds)</label>
-                            <input type="range" class="form-range" min="0.5" max="3" step="0.5" id="animSpeed">
+                            <input type="range" class="form-range mt-3" min="0.5" max="3" step="0.5" id="animSpeed">
                         </div>
 
-                        <h6 class="fw-bold text-pink mb-3">Reward System Configuration</h6>
-                        <div class="mb-4">
+                        <h6 class="fw-bold text-pink mb-3">Reward & System Rules</h6>
+                        <div class="p-3 bg-light rounded-4 mb-4">
                             <label class="form-label small fw-bold">Star Conversion Rate</label>
-                            <select class="form-select rounded-pill border-2">
+                            <select class="form-select rounded-pill mb-3">
                                 <option>1 Activity = 1 Star</option>
-                                <option>1 Lesson = 5 Stars</option>
+                                <option selected>1 Activity = 3 Stars</option>
                             </select>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="autoMod">
+                                <label class="form-check-label small" for="autoMod">Bypass Admin Review for Trusted Contributors</label>
+                            </div>
                         </div>
 
-                        <button type="submit" class="btn btn-pink w-100 rounded-pill py-3 fw-bold shadow">SAVE SYSTEM SETTINGS</button>
+                        <button type="submit" class="btn btn-pink w-100 rounded-pill py-3 fw-bold shadow">SAVE GLOBAL SETTINGS</button>
                     </form>
                 </div>
             </div>

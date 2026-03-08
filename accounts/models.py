@@ -51,49 +51,66 @@ class ChildProfile(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # ... keep your existing fields (parent, name, age, etc.) ...
+    
+    # New fields for the one-time screening logic
+    autism_percentage = models.FloatField(default=0.0)
+    is_high_sensitivity = models.BooleanField(default=False)
+    
+    # ... keep your existing __str__ method ...
 
     def __str__(self):
         return f"{self.name} ({self.parent.email})"
 
+# accounts/models.py
+import urllib.parse as urlparse
+from django.db import models
+
 class Lesson(models.Model):
-    contributor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # Existing fields
+    contributor = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    skill_category = models.CharField(max_length=50, default='communication')
-    difficulty_level = models.CharField(max_length=20, default='beginner')
+    is_activity = models.BooleanField(default=False)
+    admin_notes = models.TextField(blank=True, null=True) # Logic: Admin writes notes here on rejection
+    # Professional Metadata
+    duration_minutes = models.IntegerField(default=0)
+    skill_category = models.CharField(max_length=100)
+    target_age_group = models.CharField(max_length=50)
+    difficulty_level = models.CharField(max_length=50)
+    learning_objectives = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    content_type = models.CharField(max_length=50) # 'video', 'pdf', 'youtube', etc.
     
-    # Media & Activity Engines
-    MEDIA_TYPES = (
-        ('video', 'Video Lesson'),
-        ('audio', 'Audio/Sound Clip'),
-        ('animation', 'Animated Content'),
-        ('image_set', 'Image Set'),
-    )
-    content_type = models.CharField(max_length=20, choices=MEDIA_TYPES)
+    # Assets
+    file = models.FileField(upload_to='lessons/files/', blank=True, null=True) # Set blank=True if using URL instead
+    thumbnail = models.ImageField(upload_to='lessons/thumbs/', blank=True, null=True)
+    video_url = models.URLField(blank=True, null=True, help_text="Paste YouTube link here")
     
-    ACTIVITY_TYPES = (
-        ('none', 'General Lesson (No Game)'),
-        ('matching', 'Matching Game'),
-        ('sequencing', 'Sequencing Task'),
-        ('shuffling', 'Card Shuffling'),
-        ('drag_drop', 'Drag and Drop'),
-    )
-    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES, default='none')
-    
-    file = models.FileField(upload_to='contributor_content/')
-    thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True)
-    
-    # Content Moderation
+    # Control
     is_approved = models.BooleanField(default=False)
-    admin_feedback = models.TextField(blank=True, null=True)
-    
-    # Performance Insights
-    views_count = models.PositiveIntegerField(default=0)
-    completion_rate = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.title} ({self.get_content_type_display()})"
+    @property
+    def youtube_id(self):
+        """Extracts the YouTube ID from various URL formats"""
+        if not self.video_url:
+            return None
+        
+        parsed_url = urlparse.urlparse(self.video_url)
+        if parsed_url.hostname == 'youtu.be':
+            return parsed_url.path[1:]
+        if parsed_url.hostname in ('www.youtube.com', 'youtube.com'):
+            if parsed_url.path == '/watch':
+                return urlparse.parse_qs(parsed_url.query).get('v', [None])[0]
+            if parsed_url.path[:7] == '/embed/':
+                return parsed_url.path.split('/')[2]
+            if parsed_url.path[:3] == '/v/':
+                return parsed_url.path.split('/')[2]
+        return None
 
+    def __str__(self):
+        return self.title
 class Assignment(models.Model):
     child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name='assignments')
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
@@ -118,10 +135,35 @@ class ScreeningResult(models.Model):
         return f"Test for {self.child.name}: {self.score_percentage}%"
 
 # Feature: Global System Notifications
+# accounts/models.py
+
 class Notification(models.Model):
+    # ADD THIS LINE: Links the notification to a specific user
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
     message = models.TextField()
     is_active = models.BooleanField(default=True)
+    is_read = models.BooleanField(default=False) # Good for demo tracking
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Global Alert: {self.message[:30]}..."
+        recipient = self.user.username if self.user else "Global"
+        return f"Alert for {recipient}: {self.message[:30]}..."
+# accounts/models.py
+class ActivityProgress(models.Model):
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    completed_at = models.DateTimeField(auto_now_add=True)
+    stars_earned = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.child.name} - {self.lesson.title}"
+# accounts/models.py
+class LessonFeedback(models.Model):
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='user_feedback')
+    parent = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    is_moderated = models.BooleanField(default=False) # Admin must check this
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Feedback for {lesson.title} by {parent.first_name}"

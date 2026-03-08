@@ -20,7 +20,12 @@
                     Empowering Bright Futures for Every Child
                 </h1>
                 <div class="d-flex align-items-center animate__animated animate__fadeInUp">
-                    <a href="{% url 'register' %}" class="btn btn-pink px-4 py-3 px-md-5 me-4 shadow">Get Started</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'role_dashboard' %}" class="btn btn-pink px-4 py-3 px-md-5 me-4 shadow">Go to Dashboard</a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-pink px-4 py-3 px-md-5 me-4 shadow">Get Started</a>
+                    {% endif %}
+                    
                     <a href="#about" class="btn btn-pink px-4 py-3 px-md-5 shadow-sm">Learn More</a>
                 </div>
             </div>

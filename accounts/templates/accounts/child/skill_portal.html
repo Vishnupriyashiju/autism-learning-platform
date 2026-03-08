@@ -3,18 +3,31 @@
 
 {% block content %}
 <div class="container-fluid min-vh-100 py-5" style="background: #fffafa;">
+    <div class="container d-flex justify-content-between align-items-center mb-5 animate__animated animate__fadeIn">
+        <div class="text-start">
+            <h4 class="text-pink fw-bold mb-0">PORTAL ACTIVE: {{ child.name|upper }}</h4>
+            <p class="text-muted small">Autism Readiness Score: {{ child.autism_percentage }}%</p>
+        </div>
+        <a href="{% url 'exit_child_gate' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+            <i class="fas fa-lock me-2"></i>Parent Exit
+        </a>
+    </div>
+
     <div class="container text-center mb-5">
-        <h4 class="text-pink fw-bold">PORTAL ACTIVE: {{ child.name|upper }}</h4>
         <h1 class="display-5 fw-bold text-dark">Select a Focus Area</h1>
-        <p class="text-muted">Click an icon to view available lessons for that skill.</p>
+        <p class="text-muted">Click an icon to start your personalized learning journey.</p>
     </div>
 
     <div class="container">
         <div class="row g-4 justify-content-center">
             {% for skill in skills %}
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col-6 col-md-4 col-lg-3 animate__animated animate__zoomIn" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
                 <a href="{% url 'skill_lessons_view' child.id skill.slug %}" class="skill-card-link">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center skill-card-inner">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center skill-card-inner position-relative">
+                        <span class="position-absolute top-0 end-0 m-3 badge rounded-pill bg-soft-pink text-pink small">
+                            Explore
+                        </span>
+                        
                         <i class="fas {{ skill.icon }} fa-3x text-pink mb-3"></i>
                         <h5 class="fw-bold text-dark mb-0">{{ skill.name }}</h5>
                     </div>
@@ -29,7 +42,11 @@
     .skill-card-link { text-decoration: none; transition: transform 0.3s ease; display: block; }
     .skill-card-link:hover { transform: translateY(-10px); }
     .skill-card-inner { transition: all 0.3s ease; border: 2px solid transparent !important; }
-    .skill-card-link:hover .skill-card-inner { background: #fce4ec; border-color: #f06292 !important; }
+    .skill-card-link:hover .skill-card-inner { background: #fdf2f5; border-color: #f06292 !important; box-shadow: 0 1rem 3rem rgba(240, 98, 146, 0.15) !important; }
     .text-pink { color: #f06292 !important; }
+    .bg-soft-pink { background-color: #fce4ec !important; }
+    
+    /* Child-friendly tap effect */
+    .skill-card-inner:active { transform: scale(0.95); }
 </style>
 {% endblock %}

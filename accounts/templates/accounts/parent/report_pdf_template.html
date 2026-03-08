@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #f06292; padding-bottom: 20px; }
+        .title { color: #f06292; font-size: 24px; margin-bottom: 5px; }
+        .summary-box { background: #fdf2f5; padding: 20px; margin: 20px 0; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #f8f9fa; text-align: left; padding: 10px; border-bottom: 1px solid #ddd; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .footer { margin-top: 50px; font-size: 10px; text-align: center; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">NeuroSkills Progress Report</div>
+        <div>Generated for: <strong>{{ child.name }}</strong></div>
+        <div>Date: {{ date|date:"d M Y" }}</div>
+    </div>
+
+    <div class="summary-box">
+        <strong>Report Overview:</strong><br>
+        Total Activities Completed: {{ records.count }}<br>
+        Total Rewards Earned: {{ total_stars }} Stars
+    </div>
+
+    <h3>Detailed Activity History</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Activity Name</th>
+                <th>Category</th>
+                <th>Stars</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.completed_at|date:"d/m/Y" }}</td>
+                <td>{{ record.lesson.title }}</td>
+                <td>{{ record.lesson.skill_category|title }}</td>
+                <td>{{ record.stars_earned }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        © 2026 NeuroSkills Autism Learning Portal - This is a system-generated report.
+    </div>
+</body>
+</html>

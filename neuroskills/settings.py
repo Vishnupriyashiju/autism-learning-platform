@@ -100,9 +100,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
+# settings.py
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+# Change this from '/accounts/login/' to the URL name 'login'
+LOGIN_REDIRECT_URL = 'role_dashboard' 
+LOGOUT_REDIRECT_URL = 'home' # Redirecting to home after logout ensures a fresh start
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -111,3 +113,5 @@ REST_FRAMEWORK = {
 }
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# settings.py
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True #

@@ -24,6 +24,7 @@
 
 <div class="container">
     <div class="row g-4 justify-content-center">
+        
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden animate__animated animate__fadeInUp">
                 <div class="position-relative" style="height: 200px;">
@@ -32,8 +33,13 @@
                 </div>
                 <div class="card-body p-4 text-center">
                     <h5 class="card-title fw-bold text-dark">Child Profiles</h5>
-                    <p class="card-text text-muted small">Manage profiles and sensory preferences for each child.</p>
-                    <a href="{% url 'child_list' %}" class="btn btn-pink w-100 rounded-pill py-2 fw-bold">View Profiles</a>
+                    <p class="card-text text-muted small">Manage credentials and sensory modes (Process 2.0.4).</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'child_list' %}" class="btn btn-pink rounded-pill py-2 fw-bold">View Profiles</a>
+                        <a href="{% url 'add_child' %}" class="btn btn-outline-pink rounded-pill py-2 fw-bold">
+                            <i class="fas fa-plus-circle me-1"></i> Add New Child
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,18 +51,27 @@
                     <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(240, 98, 146, 0.2);"></div>
                 </div>
                 <div class="card-body p-4 text-center">
-                    <h5 class="card-title fw-bold text-dark">Launch Child Gate</h5>
-                    <p class="card-text text-muted small">Enter the full-page skill selection portal for personalized learning.</p>
+                    <h5 class="card-title fw-bold text-dark">Portal Gateway</h5>
+                    <p class="card-text text-muted small">Access skill grids or specialized assisted entry gates.</p>
                     
-                    <div class="dropdown">
-                        <button class="btn btn-pink w-100 rounded-pill py-2 fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <div class="dropdown mt-3">
+                        <button class="btn btn-pink w-100 rounded-pill py-2 fw-bold dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
                             Select Child to Start
                         </button>
-                        <ul class="dropdown-menu w-100 rounded-3 border-0 shadow">
+                        <ul class="dropdown-menu w-100 rounded-4 border-0 shadow-lg p-2">
                             {% for child in children %}
-                                <li><a class="dropdown-item py-2" href="{% url 'skill_selection_portal' child.id %}">🚀 {{ child.name }}</a></li>
+                                <li>
+                                    <a class="dropdown-item py-3 rounded-3 d-flex justify-content-between align-items-center" href="{% url 'child_login_redirect' child.id %}">
+                                        <span>🚀 {{ child.name }}</span>
+                                        {% if child.autism_percentage >= 50 %}
+                                            <span class="badge rounded-pill bg-warning text-dark px-2" style="font-size: 0.6rem;">High Support</span>
+                                        {% else %}
+                                            <span class="badge rounded-pill bg-success text-white px-2" style="font-size: 0.6rem;">Direct</span>
+                                        {% endif %}
+                                    </a>
+                                </li>
                             {% empty %}
-                                <li><a class="dropdown-item disabled">No profiles found</a></li>
+                                <li><a class="dropdown-item disabled text-center">No profiles found</a></li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -67,18 +82,100 @@
         <div class="col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
                 <div class="position-relative" style="height: 200px;">
-                    <img src="{% static 'img/event-1.jpg' %}" class="w-100 h-100" style="object-fit: cover;" alt="Rewards">
+                    <img src="{% static 'img/event-1.jpg' %}" class="w-100 h-100" style="object-fit: cover;" alt="Reports">
                     <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(240, 98, 146, 0.2);"></div>
                 </div>
                 <div class="card-body p-4 text-center">
-                    <h5 class="card-title fw-bold text-dark">Progress & Reports</h5>
-                    <p class="card-text text-muted small">View auto-generated reports and success logs for your children.</p>
-                    <button class="btn btn-pink w-100 rounded-pill py-2 fw-bold">View Reports</button>
+                    <h5 class="card-title fw-bold text-dark">Progress Hub</h5>
+                    <p class="card-text text-muted small">View growth charts and export performance data to PDF.</p>
+                    
+                    <div class="dropdown mt-3">
+                        <button class="btn btn-pink w-100 rounded-pill py-2 fw-bold dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-line me-1"></i> Performance Reports
+                        </button>
+                        <ul class="dropdown-menu w-100 rounded-4 border-0 shadow-lg p-2">
+                            {% for child in children %}
+                                <li>
+                                    <a class="dropdown-item py-2 rounded-3" href="{% url 'parent_report' child.id %}">
+                                        📊 {{ child.name }}'s History
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
+
+<div class="container pb-5">
+    <div class="card border-0 shadow-sm rounded-5 mt-5 overflow-hidden animate__animated animate__fadeInUp">
+        <div class="card-header bg-white py-4 px-4 border-bottom d-flex align-items-center">
+            <div class="bg-soft-pink p-3 rounded-circle me-3">
+                <i class="fas fa-comment-medical text-pink fa-lg"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold text-dark mb-0">System Controller Feedback</h5>
+                <small class="text-muted">Report sensory triggers or milestone successes directly.</small>
+            </div>
+        </div>
+        <div class="card-body p-4 p-lg-5">
+            <form method="POST" action="{% url 'submit_lesson_feedback' %}">
+                {% csrf_token %}
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold text-dark small text-uppercase">1. Reference Activity</label>
+                        <select name="lesson_id" class="form-select border-2 rounded-4 p-3" required>
+                            <option value="" disabled selected>Which activity triggered this report?</option>
+                            {% for lesson in approved_lessons %}
+                                <option value="{{ lesson.id }}">{{ lesson.title }} ({{ lesson.skill_category|title }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-7">
+                        <label class="form-label fw-bold text-dark small text-uppercase">2. Observation Category</label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <input type="radio" class="btn-check" name="category" id="cat1" value="Sensory" checked>
+                            <label class="btn btn-outline-pink rounded-pill px-4" for="cat1">✨ Sensory Adjustment</label>
+                            
+                            <input type="radio" class="btn-check" name="category" id="cat2" value="Difficulty">
+                            <label class="btn btn-outline-pink rounded-pill px-4" for="cat2">🧩 Difficulty Tuning</label>
+                            
+                            <input type="radio" class="btn-check" name="category" id="cat3" value="Positive">
+                            <label class="btn btn-outline-pink rounded-pill px-4" for="cat3">⭐ Goal Achieved</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-dark small text-uppercase">3. Message to Admin</label>
+                        <textarea name="message" class="form-control border-2 rounded-4 p-3" rows="3" 
+                                  placeholder="Provide specific details for the System Controller..." required></textarea>
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-pink btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                            Transmit Report <i class="fas fa-paper-plane ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-pink { background-color: #fce4ec; }
+    .text-pink { color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; border: none; transition: 0.3s; }
+    .btn-pink:hover { background-color: #ec407a; color: white; transform: translateY(-2px); }
+    .btn-outline-pink { color: #f06292; border: 2px solid #f06292; }
+    .btn-outline-pink:hover { background-color: #f06292; color: white; }
+    .dropdown-item:hover { background-color: #fce4ec; color: #f06292; }
+    .rounded-5 { border-radius: 2rem !important; }
+</style>
 
 <div class="py-5"></div>
 {% endblock %}

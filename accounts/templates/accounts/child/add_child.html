@@ -69,7 +69,88 @@
                                     </select>
                                 </div>
 
-                                <div class="col-12 mb-4">
+                                <div class="col-12 mt-4">
+                                    <div class="p-4 rounded-4" style="background-color: #fff0f5; border: 1px dashed #f06292;">
+                                        <h5 class="fw-bold text-dark mb-1">
+                                            <i class="fas fa-clipboard-check text-pink me-2"></i>Developmental Screening
+                                        </h5>
+                                        <p class="text-muted small mb-4">Help us personalize the portal by answering these 5 questions.</p>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-4">
+                                                <label class="form-label small fw-bold text-dark">1. Does the child maintain consistent eye contact?</label>
+                                                <div class="d-flex gap-4 mt-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q1" id="q1y" value="no" required>
+                                                        <label class="form-check-label small" for="q1y">Yes</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q1" id="q1n" value="yes">
+                                                        <label class="form-check-label small" for="q1n">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-4">
+                                                <label class="form-label small fw-bold text-dark">2. Does the child frequently repeat words/phrases?</label>
+                                                <div class="d-flex gap-4 mt-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q2" id="q2y" value="yes" required>
+                                                        <label class="form-check-label small" for="q2y">Yes</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q2" id="q2n" value="no">
+                                                        <label class="form-check-label small" for="q2n">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-4">
+                                                <label class="form-label small fw-bold text-dark">3. Does the child prefer solitary play?</label>
+                                                <div class="d-flex gap-4 mt-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q3" id="q3y" value="yes" required>
+                                                        <label class="form-check-label small" for="q3y">Yes</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q3" id="q3n" value="no">
+                                                        <label class="form-check-label small" for="q3n">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-4">
+                                                <label class="form-label small fw-bold text-dark">4. Intense reactions to specific sounds or lights?</label>
+                                                <div class="d-flex gap-4 mt-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q4" id="q4y" value="yes" required>
+                                                        <label class="form-check-label small" for="q4y">Yes</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q4" id="q4n" value="no">
+                                                        <label class="form-check-label small" for="q4n">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-4">
+                                                <label class="form-label small fw-bold text-dark">5. Is the child upset by changes in routine?</label>
+                                                <div class="d-flex gap-4 mt-1">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q5" id="q5y" value="yes" required>
+                                                        <label class="form-check-label small" for="q5y">Yes</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="q5" id="q5n" value="no">
+                                                        <label class="form-check-label small" for="q5n">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-4 mt-2">
                                     <label class="form-label fw-bold text-dark small">SENSORY TRIGGERS / NOTES</label>
                                     <textarea class="form-control border-0 bg-light py-2" name="notes" rows="2" placeholder="List any triggers or special interests..."></textarea>
                                 </div>
@@ -77,7 +158,7 @@
 
                             <div class="d-flex gap-3">
                                 <button type="submit" class="btn btn-pink px-5 py-3 fw-bold rounded-pill shadow-sm w-100">
-                                    Create Profile
+                                    Create Profile & Complete Screening
                                 </button>
                             </div>
                         </form>
@@ -87,4 +168,29 @@
         </div>
     </div>
 </div>
+<div class="col-12 mb-4">
+    <div class="p-4 rounded-4 bg-light border">
+        <h5 class="fw-bold text-dark mb-1">
+            <i class="fas fa-key text-pink me-2"></i>Student Access Credentials
+        </h5>
+        <p class="text-muted small mb-3">Create a separate login for your child to access their portal independently.</p>
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-dark small">STUDENT USERNAME</label>
+                <input type="text" class="form-control border-0 bg-white py-2" name="student_username" placeholder="e.g. vishnu_2026" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-dark small">STUDENT PASSWORD</label>
+                <input type="password" class="form-control border-0 bg-white py-2" name="student_password" placeholder="Create a simple password" required>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .text-pink { color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; border: none; }
+    .btn-pink:hover { background-color: #ec407a; color: white; }
+    .form-check-input:checked { background-color: #f06292; border-color: #f06292; }
+</style>
 {% endblock %}

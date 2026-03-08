@@ -2,86 +2,165 @@
 {% load static %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="bg-pink p-4 text-white text-center">
-                    <h2 class="fw-bold mb-0">🚀 Create New Content</h2>
-                    <p class="mb-0">Upload media and set up interactive activities</p>
-                </div>
-                
-                <div class="card-body p-4 p-lg-5">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-dark">Lesson Title</label>
-                            <input type="text" name="title" class="form-control rounded-pill border-2" placeholder="e.g., Identifying Emotions" required>
+<div class="upload-page-wrapper" style="background: linear-gradient(rgba(240, 98, 146, 0.7), rgba(240, 98, 146, 0.7)), url('{% static 'img/blog-1.jpg' %}') no-repeat center center fixed; background-size: cover; min-height: 100vh; padding: 60px 0;">
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeInUp" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+                    
+                    <div class="card-header bg-white border-0 pt-5 pb-0 text-center">
+                        <div class="d-inline-block bg-soft-pink p-3 rounded-circle mb-3">
+                            <i class="fas fa-magic text-pink fa-2x"></i>
                         </div>
+                        <h2 class="text-dark fw-bold">Professional Content Creator</h2>
+                        <p class="text-muted">Publish instructional lessons or interactive JS games</p>
+                        <hr class="mx-auto" style="width: 50px; height: 3px; background: #f06292; border: 0; opacity: 1;">
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold text-dark">Skill Category</label>
-                                <select name="skill_category" class="form-select rounded-pill border-2" required>
-                                    <option value="communication">🗣️ Communication</option>
-                                    <option value="social">🤝 Social Skills</option>
-                                    <option value="motor">🏃 Motor Skills</option>
-                                    <option value="daily_living">🏠 Daily Living</option>
-                                </select>
+                    <div class="card-body p-4 p-lg-5">
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
+                            
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-9">
+                                    <label class="form-label fw-bold text-dark small">TITLE</label>
+                                    <input type="text" name="title" class="form-control border-0 bg-light py-2 px-3" placeholder="e.g., Communication Puzzle" required>
+                                </div>
+                                <div class="col-md-3" id="duration-container">
+                                    <label class="form-label fw-bold text-dark small">MINS</label>
+                                    <input type="number" name="duration" class="form-control border-0 bg-light py-2 px-3" placeholder="10">
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold text-dark">Difficulty Level</label>
-                                <select name="difficulty_level" class="form-select rounded-pill border-2" required>
-                                    <option value="beginner">🟢 Beginner</option>
-                                    <option value="intermediate">🟡 Intermediate</option>
-                                    <option value="advanced">🔴 Advanced</option>
-                                </select>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark small">SKILL CATEGORY</label>
+                                    <select name="skill_category" class="form-select border-0 bg-light py-2 px-3" required>
+                                        <option value="" disabled selected>Select Category</option>
+                                        <option value="behavioral">🧠 Behavioral</option>
+                                        <option value="communication">🗣️ Communication</option>
+                                        <option value="social">🤝 Social Skills</option>
+                                        <option value="cognitive">💡 Cognitive</option>
+                                        <option value="motor">🏃 Motor Skills</option>
+                                        <option value="sensory">✨ Sensory</option>
+                                        <option value="academic">📚 Academic</option>
+                                        <option value="self_care">❤️ Self-Care</option>
+                                        <option value="vocal">🎤 Vocal/Speech</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-dark small">AGE GROUP</label>
+                                    <select name="target_age" class="form-select border-0 bg-light py-2 px-3" required>
+                                        <option value="preschool">Preschool (3-5)</option>
+                                        <option value="primary" selected>Primary (6-12)</option>
+                                        <option value="teen">Teen (13+)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4" id="difficulty-container">
+                                    <label class="form-label fw-bold text-dark small">DIFFICULTY</label>
+                                    <select name="difficulty_level" class="form-select border-0 bg-light py-2 px-3">
+                                        <option value="beginner"> Beginner</option>
+                                        <option value="intermediate"> Intermediate</option>
+                                        <option value="advanced"> Advanced</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold text-dark">Media Type</label>
-                                <select name="content_type" class="form-select rounded-pill border-2">
-                                    <option value="video">🎥 Video Lesson</option>
-                                    <option value="audio">🎵 Audio/Sound Clip</option>
-                                    <option value="animation">✨ Animated Content</option>
-                                    <option value="image_set">🖼️ Image Set</option>
-                                </select>
+                            <div class="form-check form-switch mb-4 p-3 rounded-4 shadow-sm" style="background: #fff0f5; border: 1px solid #f06292;">
+                                <input class="form-check-input ms-0 me-3" type="checkbox" name="is_activity" id="isActivity" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                                <label class="form-check-label fw-bold text-dark" for="isActivity">
+                                    <i class="fas fa-gamepad text-pink me-2"></i> Mark as Interactive Activity (Game)
+                                </label>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold text-dark">Activity Template</label>
-                                <select name="activity_type" class="form-select rounded-pill border-2">
-                                    <option value="none">📖 General Lesson</option>
-                                    <option value="shuffling">🃏 Card Shuffling</option>
-                                    <option value="matching">🧩 Matching Game</option>
-                                    <option value="sequencing">🔢 Sequencing Task</option>
-                                    <option value="drag_drop">🖱️ Drag and Drop</option>
-                                </select>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark small">LEARNING OBJECTIVES</label>
+                                <input type="text" name="objectives" class="form-control border-0 bg-light py-2 px-3" placeholder="e.g., Eye Contact, Focus">
                             </div>
-                        </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-dark">Upload Primary File</label>
-                            <input type="file" name="file" class="form-control rounded-4 border-2" required>
-                            <small class="text-muted">Upload your video, mp3, or image assets here.</small>
-                        </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark small">DESCRIPTION</label>
+                                <textarea name="description" class="form-control border-0 bg-light py-2 px-3" rows="2" placeholder="Describe the lesson or how the game works..."></textarea>
+                            </div>
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label fw-bold text-dark small">MEDIA TYPE</label>
+        <select name="content_type" id="contentType" class="form-select border-0 bg-light py-2 px-3" required>
+            <option value="video">🎥 Video Lesson (Upload or Link)</option>
+            <option value="pdf">📄 PDF Document</option>
+            <option value="image_set">🖼️ Image Set</option>
+            <option value="js_game">🚀 Custom JavaScript Game</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label fw-bold text-dark small">THUMBNAIL IMAGE</label>
+        <input type="file" name="thumbnail" class="form-control border-0 bg-light py-1 px-3">
+    </div>
+</div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-dark">Cover Thumbnail</label>
-                            <input type="file" name="thumbnail" class="form-control rounded-4 border-2">
-                        </div>
+<div class="mb-4 p-3 rounded-4 shadow-sm animate__animated animate__fadeIn" id="youtube-container" style="background: #fff5f8; border: 1px solid #f06292;">
+    <label class="form-label fw-bold text-dark small">
+        <i class="fab fa-youtube text-danger me-2"></i>PASTE YOUTUBE URL
+    </label>
+    <input type="url" name="video_url" id="videoUrl" class="form-control border-0 py-2 px-3" placeholder="https://www.youtube.com/watch?v=...">
+    <small class="text-muted d-block mt-1">If using a YouTube link, you can skip the file upload below.</small>
+</div>
 
-                        <div class="text-center pt-3">
-                            <button type="submit" class="btn btn-pink btn-lg px-5 rounded-pill shadow fw-bold">
-                                Submit for Admin Approval
-                            </button>
-                        </div>
-                    </form>
+<div class="mb-5">
+    <div class="upload-zone p-4 text-center rounded-4" id="uploadZone" style="border: 2px dashed #f06292; background: rgba(240, 98, 146, 0.05);">
+        <i class="fas fa-file-upload text-pink fa-2x mb-2"></i>
+        <label class="d-block fw-bold text-dark mb-1" id="fileLabel">Upload Primary Lesson File</label>
+        <input type="file" name="file" id="fileInput" class="form-control border-0 bg-transparent text-center">
+        <span class="x-small text-muted" id="fileHelp">Supports MP4, PDF, or .js files.</span>
+    </div>
+</div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-pink btn-lg px-5 py-3 fw-bold rounded-pill shadow">
+                                    SUBMIT FOR REVIEW
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %} 
+
+<script>
+    // Logic to handle optional fields if JS Game is selected
+    document.getElementById('contentType').addEventListener('change', function() {
+        const isJS = this.value === 'js_game';
+        const durationCont = document.getElementById('duration-container');
+        const difficultyCont = document.getElementById('difficulty-container');
+        const isActivityCheck = document.getElementById('isActivity');
+        const fileLabel = document.getElementById('fileLabel');
+        const fileHelp = document.getElementById('fileHelp');
+
+        if (isJS) {
+            // Hide non-mandatory fields for JS games
+            durationCont.style.display = 'none';
+            difficultyCont.style.display = 'none';
+            // Auto-check "Is Activity" because JS is always interactive
+            isActivityCheck.checked = true;
+            fileLabel.innerText = "Upload Custom .js Game File";
+            fileHelp.innerText = "The file must contain the 'startNeuroGame' function.";
+        } else {
+            durationCont.style.display = 'block';
+            difficultyCont.style.display = 'block';
+            fileLabel.innerText = "Upload Primary Lesson File";
+            fileHelp.innerText = "Supports MP4, PDF, and Images.";
+        }
+    });
+</script>
+
+<style>
+    .bg-soft-pink { background-color: #fdf2f5; }
+    .text-pink { color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; border: none; }
+    .btn-pink:hover { background-color: #ec407a; color: white; transform: scale(1.02); transition: 0.3s; }
+    .form-control:focus, .form-select:focus { background-color: #fce4ec !important; box-shadow: none; }
+    .x-small { font-size: 0.75rem; }
+</style>
+{% endblock %}

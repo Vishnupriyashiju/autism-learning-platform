@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-5 bg-light mb-5">
+    <div class="container">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'contributor_dashboard' %}" class="btn btn-outline-secondary rounded-pill me-3">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h1 class="fw-bold text-dark mb-0">Edit Module: {{ lesson.title }}</h1>
+        </div>
+
+        {% if lesson.admin_notes %}
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 p-4 mb-5">
+            <h5 class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Admin Revision Notes</h5>
+            <p class="mb-0 fs-5">"{{ lesson.admin_notes }}"</p>
+        </div>
+        {% endif %}
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-body p-5">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Lesson Title</label>
+                            <input type="text" name="title" class="form-control rounded-pill p-3" value="{{ lesson.title }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Skill Category</label>
+                            <input type="text" name="skill_category" class="form-control rounded-pill p-3" value="{{ lesson.skill_category }}" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Difficulty Level</label>
+                            <select name="difficulty_level" class="form-select rounded-pill p-3">
+                                <option value="beginner" {% if lesson.difficulty_level == 'beginner' %}selected{% endif %}>Beginner</option>
+                                <option value="intermediate" {% if lesson.difficulty_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                                <option value="advanced" {% if lesson.difficulty_level == 'advanced' %}selected{% endif %}>Advanced</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Content Type</label>
+                            <select name="content_type" class="form-select rounded-pill p-3">
+                                <option value="video" {% if lesson.content_type == 'video' %}selected{% endif %}>Animated Video</option>
+                                <option value="pdf" {% if lesson.content_type == 'pdf' %}selected{% endif %}>Educational PDF</option>
+                                <option value="youtube" {% if lesson.content_type == 'youtube' %}selected{% endif %}>YouTube URL</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Duration (Minutes)</label>
+                            <input type="number" name="duration_minutes" class="form-control rounded-pill p-3" value="{{ lesson.duration_minutes }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Detailed Description</label>
+                            <textarea name="description" class="form-control rounded-4 p-3" rows="4">{{ lesson.description }}</textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Replace File (Optional)</label>
+                            <input type="file" name="file" class="form-control rounded-pill p-3">
+                            {% if lesson.file %}<small class="text-muted ms-3">Current: {{ lesson.file.name }}</small>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Update YouTube Link</label>
+                            <input type="url" name="video_url" class="form-control rounded-pill p-3" placeholder="https://youtube.com/..." value="{{ lesson.video_url|default:'' }}">
+                        </div>
+
+                        <div class="col-12 text-end mt-5">
+                            <hr class="mb-4">
+                            <button type="submit" class="btn btn-pink px-5 py-3 rounded-pill shadow-sm fw-bold">
+                                <i class="fas fa-paper-plane me-2"></i> Save Changes & Resubmit for Review
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-pink { background-color: #f06292; color: white; border: none; }
+    .btn-pink:hover { background-color: #ec407a; color: white; transform: translateY(-2px); transition: 0.3s; }
+</style>
+{% endblock %}

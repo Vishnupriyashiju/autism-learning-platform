@@ -27,11 +27,16 @@ urlpatterns = [
     # Feature: Skill-Specific Lesson Filtering (Process 4.0.1)
     path('dashboard/parent/skill-lessons/<int:child_id>/<str:skill_slug>/', views.skill_lessons_view, name='skill_lessons_view'),
 
-    # --- CHILD LEARNING INTERFACE ---
-    path('dashboard/child/<int:child_id>/', views.child_dashboard, name='child_dashboard'),
-    path('activity/play/<int:assignment_id>/', views.system_activity_player, name='system_activity_player'),
-    path('activity/complete/<int:assignment_id>/', views.complete_activity, name='complete_activity'),
-    path('dashboard/child/exit/', views.exit_child_gate, name='exit_child_gate'),
+   # --- CHILD LEARNING INTERFACE ---
+# Feature: Unified Activity Player (Supports: view, matching, shuffling, sequencing, drag_drop)
+path('activity/play/<int:lesson_id>/', views.system_activity_player, name='system_activity_player'),
+
+# Finalizing tasks and exiting
+path('activity/complete/<int:assignment_id>/', views.complete_activity, name='complete_activity'),
+path('dashboard/child/exit/', views.exit_child_gate, name='exit_child_gate'),
+
+# Path for High-Sensitivity Student Login
+path('student/portal/<int:child_id>/', views.student_login_view, name='student_login_page'),
 
     # --- CONTRIBUTOR DASHBOARD ---
     path('dashboard/contributor/', views.contributor_dashboard, name='contributor_dashboard'),
@@ -55,4 +60,24 @@ urlpatterns = [
     path('dashboard/admin/approve/<int:user_id>/', views.approve_user, name='approve_user'),
     path('dashboard/admin/reject/<int:user_id>/', views.reject_user, name='reject_user'),
     path('dashboard/admin/approve-lesson/<int:lesson_id>/', views.approve_lesson, name='approve_lesson'),
+    # ADD THIS LINE to fix the NoReverseMatch error
+    path('dashboard/parent/redirect/<int:child_id>/', views.child_login_redirect, name='child_login_redirect'),
+    
+    # Path for the High-Sensitivity Student Login (if percentage >= 50)
+    path('student/login/', views.student_login_view, name='student_login'),
+    path('child/edit/<int:child_id>/', views.edit_child, name='edit_child'),
+    path('child/remove/<int:child_id>/', views.remove_child, name='remove_child'),
+    path('child/feedback/<int:child_id>/', views.save_parent_feedback, name='save_parent_feedback'),
+    path('child/<int:child_id>/report/', views.parent_report_view, name='parent_report'),
+    path('child/<int:child_id>/report/download/', views.download_progress_report, name='download_report'),
+    path('activity/complete/<int:lesson_id>/', views.record_completion, name='record_completion'),
+    path('child/<int:child_id>/report/', views.parent_report_view, name='parent_report'),
+    path('feedback/submit/', views.submit_lesson_feedback, name='submit_lesson_feedback'),
+    path('feedback/relay/<int:feedback_id>/', views.relay_feedback_to_contributor, name='relay_feedback_to_contributor'),
+    path('skill-lessons/<slug:category_slug>/', views.skill_lessons_view, name='skill_lessons'),
+    path('delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('request-update/<int:lesson_id>/', views.request_module_update, name='request_module_update'),
+    path('dashboard/admin/delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('delete-module/<int:lesson_id>/', views.delete_module, name='delete_module'),
+    path('dashboard/contributor/edit/<int:lesson_id>/', views.edit_lesson, name='edit_lesson'),
 ]

@@ -8,12 +8,14 @@
     <div class="container text-start">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'parent_dashboard' %}" class="text-pink">Dashboard</a></li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'parent_dashboard' %}" class="text-pink">Dashboard</a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">Student Profiles</li>
             </ol>
         </nav>
         <h1 class="display-5 text-dark fw-bold">🎓 Student Profiles</h1>
-        <p class="text-muted">Manage individual learning settings and view progress for each child.</p>
+        <p class="text-muted">Manage individual learning settings and provide developmental feedback.</p>
     </div>
 </div>
 
@@ -22,12 +24,19 @@
         {% for child in children %}
         <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                
                 <div class="position-relative" style="height: 160px;">
-                    <img src="{% static 'img/about.jpg' %}" class="w-100 h-100" style="object-fit: cover;" alt="Profile Background">
-                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(240, 98, 146, 0.4);"></div>
+                    <img src="{% static 'img/about.jpg' %}" 
+                         class="w-100 h-100" 
+                         style="object-fit: cover;" 
+                         alt="Profile Background">
+                    <div class="position-absolute top-0 start-0 w-100 h-100"
+                         style="background: rgba(240, 98, 146, 0.4);"></div>
+
                     <div class="position-absolute bottom-0 start-0 p-3 w-100 text-white d-flex align-items-end">
                         <div class="bg-white rounded-circle p-1 me-3 shadow">
-                            <div class="bg-soft-pink rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <div class="bg-soft-pink rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 60px; height: 60px;">
                                 <i class="fas fa-user-graduate text-pink fa-lg"></i>
                             </div>
                         </div>
@@ -36,6 +45,24 @@
                 </div>
 
                 <div class="card-body p-4">
+
+                    <!-- Screening Score -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block text-uppercase fw-bold">
+                            Registration Screening Score
+                        </small>
+                        <div class="progress mt-1" style="height: 10px; border-radius: 10px;">
+                            <div class="progress-bar bg-pink"
+                                 role="progressbar"
+                                 style="width: {{ child.autism_percentage }}%">
+                            </div>
+                        </div>
+                        <span class="small fw-bold text-pink">
+                            {{ child.autism_percentage }}% Autism Indicators Identified
+                        </span>
+                    </div>
+
+                    <!-- Age + Mode -->
                     <div class="row mb-3">
                         <div class="col-6">
                             <small class="text-muted d-block text-uppercase fw-bold">Age</small>
@@ -43,46 +70,110 @@
                         </div>
                         <div class="col-6">
                             <small class="text-muted d-block text-uppercase fw-bold">Mode</small>
-                            <span class="badge bg-soft-pink text-pink rounded-pill">{{ child.get_sensory_mode_display }}</span>
+                            <span class="badge bg-soft-pink text-pink rounded-pill">
+                                {{ child.get_sensory_mode_display }}
+                            </span>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <small class="text-muted d-block text-uppercase fw-bold">Learning Style</small>
-                        <div class="text-dark">
-                            <i class="fas {% if child.learning_style == 'visual' %}fa-eye{% elif child.learning_style == 'audio' %}fa-volume-up{% else %}fa-hand-pointer{% endif %} text-pink me-2"></i>
-                            {{ child.get_learning_style_display }}
-                        </div>
-                    </div>
-
+                    <!-- Focus Area -->
                     <div class="mb-4">
                         <small class="text-muted d-block text-uppercase fw-bold">Focus Area</small>
-                        <p class="small text-dark mb-0">{{ child.diagnosis|default:"General Development" }}</p>
+                        <p class="small text-dark mb-0">
+                            {{ child.diagnosis|default:"General Development" }}
+                        </p>
                     </div>
 
+                    <!-- Buttons -->
                     <div class="d-grid gap-2">
-                        <a href="#" class="btn btn-pink rounded-pill py-2 fw-bold shadow-sm">
-                            <i class="fas fa-play-circle me-1"></i> Start Lessons
+                        <a href="{% url 'skill_selection_portal' child.id %}" 
+                           class="btn btn-pink rounded-pill py-2 fw-bold shadow-sm">
+                            <i class="fas fa-th-large me-1"></i> Open Skill Portal
                         </a>
+
                         <div class="row g-2">
-                            <div class="col-6">
-                                <a href="#" class="btn btn-outline-pink w-100 rounded-pill btn-sm py-2">Edit</a>
+                            
+                            <!-- EDIT BUTTON -->
+                            <div class="col-4">
+                                <a href="{% url 'edit_child' child.id %}"
+                                   class="btn btn-outline-pink w-100 rounded-pill btn-sm py-2"
+                                   title="Edit Profile">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
                             </div>
-                            <div class="col-6">
-                                <a href="#" class="btn btn-outline-secondary w-100 rounded-pill btn-sm py-2">Report</a>
+
+                            <!-- FEEDBACK BUTTON -->
+                            <div class="col-4">
+                                <button class="btn btn-outline-info w-100 rounded-pill btn-sm py-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#feedbackModal{{ child.id }}">
+                                    <i class="fas fa-comment-dots"></i> Feedback
+                                </button>
                             </div>
+
+                            <!-- REMOVE BUTTON (FIXED) -->
+                            <div class="col-4">
+                                <a href="{% url 'remove_child' child.id %}"
+                                   class="btn btn-outline-danger w-100 rounded-pill btn-sm py-2"
+                                   onclick="return confirm('Are you sure you want to remove this profile?')">
+                                    <i class="fas fa-trash-alt"></i> Remove
+                                </a>
+                            </div>
+
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
+
+        <!-- FEEDBACK MODAL (FIXED ACTION) -->
+        <div class="modal fade" id="feedbackModal{{ child.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <form method="POST"
+                      action="{% url 'save_parent_feedback' child.id %}"
+                      class="modal-content border-0 rounded-4 shadow">
+                    {% csrf_token %}
+
+                    <div class="modal-header bg-pink text-white border-0 py-3">
+                        <h5 class="modal-title fw-bold">
+                            Feedback: {{ child.name }}
+                        </h5>
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body p-4">
+                        <label class="form-label fw-bold small">
+                            Log Behavioral Changes or Milestone Progress
+                        </label>
+                        <textarea name="parent_notes"
+                                  class="form-control border-0 bg-light py-2"
+                                  rows="4"
+                                  placeholder="How has the child responded to the activities today?"
+                                  required></textarea>
+                    </div>
+
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit"
+                                class="btn btn-pink w-100 rounded-pill py-2 fw-bold shadow-sm">
+                            SAVE FEEDBACK
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {% empty %}
         <div class="col-12 text-center py-5">
             <div class="bg-light rounded-4 p-5 animate__animated animate__zoomIn">
                 <i class="fas fa-user-plus fa-4x text-muted mb-3"></i>
                 <h4 class="text-dark">No student profiles created yet</h4>
-                <p class="text-muted">You need to create a profile before assigning learning modules.</p>
-                <a href="{% url 'add_child' %}" class="btn btn-pink px-5 rounded-pill mt-3">Create First Profile</a>
+                <a href="{% url 'add_child' %}"
+                   class="btn btn-pink px-5 rounded-pill mt-3">
+                    Create First Profile
+                </a>
             </div>
         </div>
         {% endfor %}
@@ -90,9 +181,14 @@
 </div>
 
 <style>
-    .text-shadow { text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-    .badge { font-size: 0.75rem; letter-spacing: 0.5px; }
-    .card { transition: transform 0.3s; }
-    .card:hover { transform: translateY(-10px); }
+    .bg-soft-pink { background-color: #fdf2f5; }
+    .text-pink { color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; border: none; }
+    .btn-pink:hover { background-color: #ec407a; color: white; }
+    .btn-outline-pink { color: #f06292; border: 1px solid #f06292; }
+    .btn-outline-info { color: #0dcaf0; border: 1px solid #0dcaf0; }
+    .btn-outline-danger { color: #dc3545; border: 1px solid #dc3545; }
+    .progress-bar.bg-pink { background-color: #f06292 !important; }
 </style>
+
 {% endblock %}

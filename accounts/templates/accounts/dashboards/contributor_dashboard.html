@@ -5,47 +5,49 @@
 <div class="container-fluid py-5 bg-soft-pink mb-5">
     <div class="container d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="display-5 text-dark fw-bold"> Contributor Studio</h1>
+            <h1 class="display-5 text-dark fw-bold">🚀 Contributor Studio</h1>
             <p class="text-pink fw-bold">Design lessons. Receive feedback. Track impact.</p>
         </div>
-        <a href="{% url 'upload_lesson' %}" class="btn btn-pink px-4 py-2 rounded-pill shadow">+ Create Content</a>
+        <a href="{% url 'upload_lesson' %}" class="btn btn-pink px-4 py-2 rounded-pill shadow-sm fw-bold">+ Create Content</a>
     </div>
 </div>
 
 <div class="container">
     <div class="row g-4 mb-5 text-center">
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white">
-                <h3 class="text-pink fw-bold mb-0">{{ total_views }}</h3>
-                <small class="text-muted fw-bold">TOTAL VIEWS</small>
+            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-pink border-4 h-100">
+                <h3 class="text-pink fw-bold mb-0">{{ total_views|default:"0" }}</h3>
+                <small class="text-muted fw-bold">ENGAGEMENT SCORE</small>
             </div>
         </div>
-        <div class="col-md-3 text-success">
-            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white">
-                <h3 class="fw-bold mb-0">{{ approved_count }}</h3>
-                <small class="text-muted fw-bold">LIVE CONTENT</small>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-success border-4 h-100">
+                <h3 class="text-success fw-bold mb-0">{{ approved_count }}</h3>
+                <small class="text-muted fw-bold">LIVE LESSONS</small>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white d-flex flex-row align-items-center justify-content-start">
-                <div class="bg-soft-pink p-2 rounded-circle me-3"><i class="fas fa-comment-dots text-pink"></i></div>
-                <div class="text-start">
-                    <h6 class="mb-0 fw-bold">Latest Feedback</h6>
-                    <small class="text-muted">You have {{ feedback_items.count }} items to review.</small>
+        <div class="col-md-6 text-start">
+            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white h-100 d-flex flex-row align-items-center">
+                <div class="bg-soft-pink p-3 rounded-circle me-3"><i class="fas fa-heart text-pink"></i></div>
+                <div>
+                    <h6 class="mb-0 fw-bold">Community Impact</h6>
+                    <small class="text-muted">You have {{ moderated_feedback.count }} verified parent responses.</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+        <div class="card-header bg-white py-4 px-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-layer-group text-pink me-2"></i>My Content Library</h5>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Title & Type</th>
-                        <th>Activity Mode</th>
+                        <th class="ps-4">Module Details</th>
+                        <th>Format</th>
                         <th>Status</th>
-                        <th>Admin Feedback</th>
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -54,43 +56,79 @@
                     <tr>
                         <td class="ps-4">
                             <span class="fw-bold text-dark d-block">{{ item.title }}</span>
-                            <small class="text-muted">{{ item.get_content_type_display }}</small>
-                        </td>
-                        <td><span class="text-muted">{{ item.get_activity_type_display }}</span></td>
-                        <td>
-                            {% if item.is_approved %}
-                            <span class="badge bg-success rounded-pill px-3">Approved</span>
-                            {% else %}
-                            <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
+                            <div class="d-flex gap-2 align-items-center">
+                                <small class="text-muted text-uppercase small">{{ item.skill_category }}</small>
+                                <span class="badge bg-soft-pink text-pink rounded-pill" style="font-size: 10px;">
+                                    {{ item.difficulty_level|title }}
+                                </span>
+                            </div>
+                            
+                            {% if not item.is_approved and item.admin_notes %}
+                            <div class="mt-2 p-2 bg-light border-start border-danger border-3 rounded-2 small text-danger animate__animated animate__headShake">
+                                <i class="fas fa-exclamation-circle me-1"></i> <b>Revision Needed:</b> {{ item.admin_notes }}
+                            </div>
                             {% endif %}
                         </td>
-                        <td class="small text-truncate" style="max-width: 200px;">
-                            {{ item.admin_feedback|default:"No feedback yet." }}
+                        <td>
+                            <span class="badge bg-light text-dark border rounded-pill px-3">
+                                {{ item.content_type|title }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if item.is_approved %}
+                                <span class="badge bg-success rounded-pill px-3"><i class="fas fa-check-circle me-1"></i>Approved</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark rounded-pill px-3"><i class="fas fa-clock me-1"></i>Under Review</span>
+                            {% endif %}
                         </td>
                         <td class="text-end pe-4">
-                            <a href="#" class="btn btn-outline-pink btn-sm rounded-pill">Update</a>
+                            <a href="{% url 'edit_lesson' item.id %}" class="btn btn-outline-pink btn-sm rounded-pill px-4 fw-bold">
+                                {% if item.admin_notes %}Fix & Resubmit{% else %}Update{% endif %}
+                            </a>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center py-5 text-muted">No content uploaded yet. Start by creating a lesson!</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-</div>
-<div class="card border-0 shadow-sm rounded-4 mt-5">
-    <div class="card-header bg-white py-3">
-        <h5 class="fw-bold text-dark mb-0">Admin Feedback & Improvements</h5>
-    </div>
-    <div class="list-group list-group-flush">
-        {% for lesson in feedback_items %}
-        <div class="list-group-item p-4">
-            <h6 class="fw-bold text-pink">{{ lesson.title }}</h6>
-            <p class="mb-0 text-muted italic">"{{ lesson.admin_feedback }}"</p>
-            <a href="{% url 'upload_lesson' %}" class="btn btn-sm btn-outline-pink mt-2">Update Content</a>
+
+    <div class="card border-0 shadow-sm rounded-4 mt-5 animate__animated animate__fadeInUp">
+        <div class="card-header bg-white py-4 px-4 border-bottom">
+            <h5 class="fw-bold text-dark mb-0"><i class="fas fa-comment-medical text-pink me-2"></i>Verified Parent Feedback</h5>
         </div>
-        {% empty %}
-        <div class="p-4 text-center text-muted">No improvement feedback yet.</div>
-        {% endfor %}
+        <div class="row g-3 p-4">
+            {% for feed in moderated_feedback %}
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 border-start border-pink border-5 h-100 bg-white shadow-hover">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h6 class="fw-bold text-dark mb-0">{{ feed.lesson.title }}</h6>
+                        <small class="text-muted small">{{ feed.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    <div class="bg-light p-3 rounded-3 mt-2">
+                        <p class="mb-0 text-muted italic small">"{{ feed.message }}"</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5 text-muted italic">
+                <i class="fas fa-comment-slash fa-3x mb-3 opacity-25"></i>
+                <p>No verified parent feedback available yet. Insights appear after Admin review.</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
+
+<style>
+    .bg-soft-pink { background-color: #fce4ec; }
+    .text-pink { color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; border: none; }
+    .btn-pink:hover { background-color: #ec407a; color: white; transform: translateY(-2px); transition: 0.3s; }
+    .btn-outline-pink { border: 2px solid #f06292; color: #f06292; transition: 0.3s; }
+    .btn-outline-pink:hover { background-color: #f06292; color: white; }
+    .shadow-hover:hover { transform: translateY(-3px); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+</style>
 {% endblock %}
