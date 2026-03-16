@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}NeuroSkills | Edit Student Profile{% endblock %}
+{% block title %}NeuroSkills | Enhance Profile{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -10,76 +10,128 @@
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="row g-0">
                     <div class="col-md-4 d-none d-md-block position-relative">
-                        <img src="{% static 'img/program-1.jpg' %}" class="w-100 h-100" style="object-fit: cover;" alt="Edit Profile">
+                        <img src="{% static 'img/program-1.jpg' %}" class="w-100 h-100" style="object-fit: cover;" alt="Enhance Profile">
                         <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(240, 98, 146, 0.4); backdrop-filter: blur(2px);">
                             <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white p-4 text-center">
-                                <i class="fas fa-user-edit fa-3x mb-3"></i>
-                                <h3 class="fw-bold">Update Profile</h3>
-                                <p class="small">Adjust settings for <strong>{{ child.name }}</strong> to better suit their current needs.</p>
+                                <div class="bg-white rounded-circle p-2 mb-3 shadow">
+                                    {% if child.child_photo %}
+                                        <img src="{{ child.child_photo.url }}" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                                    {% else %}
+                                        <i class="fas fa-user-astronaut fa-4x text-pink p-3"></i>
+                                    {% endif %}
+                                </div>
+                                <h3 class="fw-bold">Enhance Profile</h3>
+                                <p class="small px-3">Providing more details helps our system tailor the learning mode to <strong>{{ child.name }}'s</strong> specific triggers.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-8 bg-white p-5">
+                    <div class="col-md-8 bg-white p-4 p-md-5">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h2 class="text-dark fw-bold mb-0">Modify Journey</h2>
+                            <h2 class="text-dark fw-bold mb-0">Profile Optimization</h2>
                             <a href="{% url 'child_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                                <i class="fas fa-times me-1"></i> Cancel
+                                <i class="fas fa-times me-1"></i> Exit
                             </a>
                         </div>
 
-                        <form method="post" class="animate__animated animate__fadeIn">
+                        <form method="post" enctype="multipart/form-data" class="animate__animated animate__fadeIn">
                             {% csrf_token %}
 
-                            <div class="row g-3">
-                                <div class="col-md-6 mb-3">
+                            <div class="section-title mb-3 text-pink fw-bold small text-uppercase">1. Visual Identity & Basics</div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-12 mb-3 text-center bg-light p-3 rounded-4">
+                                    <label class="form-label d-block fw-bold small">UPDATE STUDENT PHOTO</label>
+                                    <input type="file" name="child_photo" class="form-control border-0 shadow-sm" accept="image/*">
+                                    <small class="text-muted mt-2 d-block">Recommended: Square image, Max 2MB</small>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label fw-bold text-dark small">STUDENT NAME</label>
                                     <input class="form-control border-0 bg-light py-2" name="name" value="{{ child.name }}" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label fw-bold text-dark small">AGE</label>
                                     <input class="form-control border-0 bg-light py-2" type="number" name="age" value="{{ child.age }}" required>
                                 </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small">GENDER</label>
+                                    <select class="form-select border-0 bg-light py-2" name="gender">
+                                        <option value="">Select</option>
+                                        <option value="Male" {% if child.gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if child.gender == 'Female' %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if child.gender == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small">AUTISM LEVEL</label>
+                                    <select class="form-select border-0 bg-light py-2" name="autism_level">
+                                        <option value="">Select</option>
+                                        <option value="Mild" {% if child.autism_level == 'Mild' %}selected{% endif %}>Mild</option>
+                                        <option value="Moderate" {% if child.autism_level == 'Moderate' %}selected{% endif %}>Moderate</option>
+                                        <option value="Severe" {% if child.autism_level == 'Severe' %}selected{% endif %}>Severe</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                                <div class="col-md-6 mb-3">
+                            <div class="section-title mb-3 text-pink fw-bold small text-uppercase">2. Sensory & Learning Settings</div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
                                     <label class="form-label fw-bold text-dark small">LEARNING STYLE</label>
                                     <select class="form-select border-0 bg-light py-2" name="learning_style">
                                         <option value="visual" {% if child.learning_style == 'visual' %}selected{% endif %}>Visual (Videos/Images)</option>
                                         <option value="audio" {% if child.learning_style == 'audio' %}selected{% endif %}>Auditory (Sound/Music)</option>
-                                        <option value="activity" {% if child.learning_style == 'activity' %}selected{% endif %}>Kinesthetic (Games/Touch)</option>
+                                        <option value="kinesthetic" {% if child.learning_style == 'kinesthetic' %}selected{% endif %}>Kinesthetic (Games)</option>
                                     </select>
                                 </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark small">SENSORY MODE</label>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small">UI SENSORY MODE</label>
                                     <select class="form-select border-0 bg-light py-2" name="sensory_mode">
-                                        <option value="low" {% if child.sensory_mode == 'low' %}selected{% endif %}>Low Stimulation (Calm)</option>
+                                        <option value="low" {% if child.sensory_mode == 'low' %}selected{% endif %}>Low Stimulation (Minimalist)</option>
                                         <option value="high" {% if child.sensory_mode == 'high' %}selected{% endif %}>High Engagement (Vibrant)</option>
-                                        <option value="neutral" {% if child.sensory_mode == 'neutral' %}selected{% endif %}>Standard</option>
+                                        <option value="neutral" {% if child.sensory_mode == 'neutral' %}selected{% endif %}>Standard Mode</option>
                                     </select>
-                                </div>
-
-                                <div class="col-md-12 mb-3">
-                                    <label class="form-label fw-bold text-dark small">PRIMARY FOCUS AREA</label>
-                                    <input class="form-control border-0 bg-light py-2" name="diagnosis" value="{{ child.diagnosis|default:'' }}" placeholder="e.g. Social Skills, Communication">
-                                </div>
-
-                                <div class="col-12 mb-4">
-                                    <label class="form-label fw-bold text-dark small">SENSORY TRIGGERS / UPDATED NOTES</label>
-                                    <textarea class="form-control border-0 bg-light py-2" name="notes" rows="4" placeholder="Update triggers or milestones...">{{ child.notes }}</textarea>
                                 </div>
                             </div>
 
-                            <div class="p-3 rounded-4 mb-4" style="background-color: #f8f9fa; border-left: 4px solid #f06292;">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small fw-bold text-muted">Original Screening Result:</span>
-                                    <span class="badge bg-soft-pink text-pink rounded-pill">{{ child.autism_percentage }}%</span>
+                            <div class="section-title mb-3 text-pink fw-bold small text-uppercase">3. Advanced Developmental Insights</div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small">PRIMARY DIAGNOSIS/TYPE</label>
+                                    <input class="form-control border-0 bg-light py-2" name="diagnosis_type" value="{{ child.diagnosis_type }}" placeholder="e.g. ASD Level 1, ADHD-PI">
                                 </div>
-                                <p class="x-small text-muted mt-1 mb-0">Note: Screening scores are calculated once during registration and cannot be modified here.</p>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small">SPECIFIC INTERESTS</label>
+                                    <input class="form-control border-0 bg-light py-2" name="interests" value="{{ child.interests }}" placeholder="e.g. Trains, Animals, Space">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark small">SENSORY TRIGGERS (SOUNDS, LIGHTS, TEXTURES)</label>
+                                    <textarea class="form-control border-0 bg-light py-2" name="notes" rows="3" placeholder="Describe triggers...">{{ child.notes }}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="section-title mb-3 text-pink fw-bold small text-uppercase">4. Student Login Credentials</div>
+                            <div class="row g-3 mb-4 p-3 rounded-4" style="background-color: #fff9fa; border: 1px dashed #f8bbd0;">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small">STUDENT USERNAME</label>
+                                    <input type="text" class="form-control border-0 bg-white shadow-sm" name="student_username" 
+                                           value="{{ child.user.username|default:'' }}" placeholder="Assign a username">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small">UPDATE PASSWORD</label>
+                                    <input type="password" class="form-control border-0 bg-white shadow-sm" name="student_password" 
+                                           placeholder="Leave blank to keep current">
+                                    <small class="text-muted" style="font-size: 0.7rem;">Enter only to change or set a new password.</small>
+                                </div>
+                                {% if not child.user %}
+                                <div class="col-12">
+                                    <div class="alert alert-warning py-2 small mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i> This profile has no linked account. Setting a username/password will create one.
+                                    </div>
+                                </div>
+                                {% endif %}
                             </div>
 
                             <button type="submit" class="btn btn-pink px-5 py-3 fw-bold rounded-pill shadow-sm w-100">
-                                <i class="fas fa-save me-2"></i> Save Changes
+                                <i class="fas fa-check-circle me-2"></i> UPDATE & OPTIMIZE PROFILE
                             </button>
                         </form>
                     </div>
@@ -93,8 +145,8 @@
     .bg-soft-pink { background-color: #fdf2f5; }
     .text-pink { color: #f06292 !important; }
     .btn-pink { background-color: #f06292; color: white; border: none; }
-    .btn-pink:hover { background-color: #ec407a; color: white; }
-    .form-select, .form-control { font-size: 0.9rem; }
-    .x-small { font-size: 0.75rem; }
+    .btn-pink:hover { background-color: #ec407a; color: white; transform: translateY(-2px); transition: 0.3s; }
+    .section-title { border-bottom: 1px solid #fce4ec; padding-bottom: 5px; letter-spacing: 1px; }
+    .bg-light { background-color: #f8f9fa !important; }
 </style>
 {% endblock %}

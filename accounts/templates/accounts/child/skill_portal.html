@@ -1,52 +1,142 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block content %}
-<div class="container-fluid min-vh-100 py-5" style="background: #fffafa;">
-    <div class="container d-flex justify-content-between align-items-center mb-5 animate__animated animate__fadeIn">
-        <div class="text-start">
-            <h4 class="text-pink fw-bold mb-0">PORTAL ACTIVE: {{ child.name|upper }}</h4>
-            <p class="text-muted small">Autism Readiness Score: {{ child.autism_percentage }}%</p>
-        </div>
-        <a href="{% url 'exit_child_gate' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
-            <i class="fas fa-lock me-2"></i>Parent Exit
-        </a>
-    </div>
+{% block title %}My Learning Portal | NeuroSkills{% endblock %}
 
-    <div class="container text-center mb-5">
-        <h1 class="display-5 fw-bold text-dark">Select a Focus Area</h1>
-        <p class="text-muted">Click an icon to start your personalized learning journey.</p>
+{% block content %}
+<div class="child-portal-wrapper animate__animated animate__fadeIn">
+    <div class="container pt-4 pb-3">
+        <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-5 shadow-sm border border-light">
+            <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">
+                    {% if child.child_photo %}
+                        <img src="{{ child.child_photo.url }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <i class="fas fa-user-astronaut text-pink fa-lg"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-dark">Welcome, {{ child.name }}!</h4>
+                    <div class="d-flex gap-2 mt-1">
+                        <span class="badge bg-soft-pink text-pink rounded-pill px-3">
+                            <i class="fas fa-trophy me-1"></i> Level 1 Learner
+                        </span>
+                        <span id="uiModeBadge" class="badge bg-light text-muted border rounded-pill px-3">
+                            <i class="fas fa-leaf me-1"></i> Calm Mode Active
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button onclick="toggleSensoryMode()" class="btn btn-light rounded-circle shadow-sm" title="Toggle Sensory Mode">
+                    <i class="fas fa-eye text-pink"></i>
+                </button>
+                
+                <a href="{% url 'exit_child_gate' %}" class="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="fas fa-door-open me-2"></i>
+                    {% if request.user.role == 'parent' %}End Session{% else %}Back to Home{% endif %}
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="container">
-        <div class="row g-4 justify-content-center">
-            {% for skill in skills %}
-            <div class="col-6 col-md-4 col-lg-3 animate__animated animate__zoomIn" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
-                <a href="{% url 'skill_lessons_view' child.id skill.slug %}" class="skill-card-link">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center skill-card-inner position-relative">
-                        <span class="position-absolute top-0 end-0 m-3 badge rounded-pill bg-soft-pink text-pink small">
-                            Explore
-                        </span>
-                        
-                        <i class="fas {{ skill.icon }} fa-3x text-pink mb-3"></i>
-                        <h5 class="fw-bold text-dark mb-0">{{ skill.name }}</h5>
+        <div class="row g-4">
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="streak-card bg-white p-3 rounded-5 shadow-sm mb-4 border-bottom border-warning border-4 text-center animate__animated animate__pulse animate__infinite">
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                        <i class="fas fa-fire text-warning fa-2x"></i>
+                        <h3 class="fw-bold text-dark mb-0">{{ child.current_streak }}</h3>
                     </div>
-                </a>
+                    <small class="text-muted fw-bold text-uppercase" style="font-size: 10px;">Day Learning Streak!</small>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-5 p-4 h-100 bg-white border-start border-pink border-5">
+                    <h6 class="fw-bold text-muted text-uppercase mb-4">My Progress</h6>
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-dark mb-0">⭐ {{ total_stars|default:"0" }}</h2>
+                        <small class="text-muted">Total Stars Earned</small>
+                        <div class="progress mt-3 rounded-pill" style="height: 12px;">
+                            <div class="progress-bar bg-pink progress-bar-striped progress-bar-animated" role="progressbar" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold text-muted text-uppercase mb-3">Quick Navigation</h6>
+                    <div class="schedule-list d-grid gap-3">
+                        <a href="{% url 'reward_store' child.id %}" class="text-decoration-none s-item d-flex align-items-center gap-3">
+                            <i class="fas fa-gift text-pink"></i>
+                            <span class="small text-dark">Star Shop</span>
+                        </a>
+                        </div>
+
+                    <div class="mt-4 pt-3 border-top text-center">
+                        <div class="reward-entry-card bg-light p-3 rounded-4">
+                            <i class="fas fa-magic text-pink fa-2x mb-2"></i>
+                            <p class="small text-dark mb-2">Check your rewards!</p>
+                            <a href="{% url 'reward_store' child.id %}" class="btn btn-pink btn-sm rounded-pill w-100 fw-bold shadow-sm">
+                                Open Star Shop
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            {% endfor %}
+
+            <div class="col-lg-9">
+                <div class="row g-4 justify-content-center">
+                    {% for skill in skills %}
+                    <div class="col-6 col-md-4 animate__animated animate__zoomIn" style="animation-delay: {{ forloop.counter0 }}00ms;">
+                        <a href="{% url 'skill_lessons_view' child.id skill.slug %}" class="skill-card-link text-decoration-none">
+                            <div class="card skill-card border-0 shadow-sm rounded-5 h-100 text-center p-4">
+                                <div class="icon-box mb-3 mx-auto shadow-sm bg-white">
+                                    <i class="fas {{ skill.icon }} fa-3x text-pink"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark mb-0">{{ skill.name }}</h5>
+                                <div class="stars-wrapper mt-2">
+                                    <i class="fas fa-star text-pink small"></i>
+                                    <i class="fas fa-star text-pink small"></i>
+                                    <i class="far fa-star text-light small"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-    .skill-card-link { text-decoration: none; transition: transform 0.3s ease; display: block; }
-    .skill-card-link:hover { transform: translateY(-10px); }
-    .skill-card-inner { transition: all 0.3s ease; border: 2px solid transparent !important; }
-    .skill-card-link:hover .skill-card-inner { background: #fdf2f5; border-color: #f06292 !important; box-shadow: 0 1rem 3rem rgba(240, 98, 146, 0.15) !important; }
-    .text-pink { color: #f06292 !important; }
-    .bg-soft-pink { background-color: #fce4ec !important; }
+    :root { --portal-bg: #fdf2f5; }
+    .vibrant-mode { --portal-bg: #fff0f5; }
+    .vibrant-mode .skill-card { background: linear-gradient(135deg, #ffffff 0%, #fff0f5 100%); }
+    body { background-color: var(--portal-bg) !important; transition: 0.5s; }
     
-    /* Child-friendly tap effect */
-    .skill-card-inner:active { transform: scale(0.95); }
+    .skill-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid transparent !important; background-color: #ffffff; }
+    .skill-card:hover { transform: scale(1.05) translateY(-5px); border-color: #fce4ec !important; box-shadow: 0 1rem 3rem rgba(240, 98, 146, 0.15) !important; }
+    .icon-box { width: 85px; height: 85px; border-radius: 25px; display: flex; align-items: center; justify-content: center; }
+    .skill-card:hover .icon-box { transform: scale(1.1) rotate(5deg); }
+
+    .avatar-circle { width: 50px; height: 50px; background-color: #fce4ec; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .bg-soft-pink { background-color: #fce4ec; }
+    .text-pink { color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; border: none; }
 </style>
+
+<script>
+    function toggleSensoryMode() {
+        const body = document.body;
+        const badge = document.getElementById('uiModeBadge');
+        body.classList.toggle('vibrant-mode');
+        
+        if(body.classList.contains('vibrant-mode')) {
+            badge.innerHTML = '<i class="fas fa-bolt me-1"></i> High Engagement';
+            badge.className = 'badge bg-soft-pink text-pink rounded-pill px-3';
+        } else {
+            badge.innerHTML = '<i class="fas fa-leaf me-1"></i> Calm Mode Active';
+            badge.className = 'badge bg-light text-muted border rounded-pill px-3';
+        }
+    }
+</script>
 {% endblock %}

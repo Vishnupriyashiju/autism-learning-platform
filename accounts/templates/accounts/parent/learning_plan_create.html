@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Create Learning Plan | {{ child.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">Create Learning Plan: {{ child.name }}</h2>
+        <a href="{% url 'learning_plan_list' child.id %}" class="btn btn-outline-secondary rounded-pill px-4">Back to Plans</a>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+            <form method="post" action="{% url 'learning_plan_create' child.id %}">
+                {% csrf_token %}
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Plan name</label>
+                        <input type="text" name="name" class="form-control rounded-4" value="My Plan" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Plan type</label>
+                        <select name="plan_type" class="form-select rounded-4">
+                            <option value="daily">Daily plan</option>
+                            <option value="weekly">Weekly plan</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Custom difficulty (optional)</label>
+                        <input type="text" name="custom_difficulty" class="form-control rounded-4" placeholder="e.g. Beginner">
+                    </div>
+                </div>
+                <p class="fw-bold small text-muted mb-3">Add rows: Skill, Activity, Duration (minutes)</p>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead class="bg-light"><tr><th>Skill</th><th>Activity</th><th>Duration (min)</th></tr></thead>
+                        <tbody>
+                            {% for i in "12345" %}
+                            <tr>
+                                <td><input type="text" name="skill_{{ forloop.counter }}" class="form-control form-control-sm" placeholder="e.g. Eye Contact"></td>
+                                <td><input type="text" name="activity_{{ forloop.counter }}" class="form-control form-control-sm" placeholder="e.g. Look at cartoon character"></td>
+                                <td><input type="number" name="duration_{{ forloop.counter }}" class="form-control form-control-sm" value="5" min="1"></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-pink rounded-pill px-5 fw-bold">Create Plan</button>
+            </form>
+        </div>
+    </div>
+</div>
+<style>.btn-pink { background-color: #f06292; color: white; border: none; } .btn-pink:hover { background-color: #ec407a; color: white; }</style>
+{% endblock %}

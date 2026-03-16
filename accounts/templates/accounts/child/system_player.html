@@ -30,32 +30,11 @@
 
             {% if mode == 'view' %}
             <div id="manual-complete" class="mt-3">
-                <button onclick="checkVictory()" class="btn btn-pink btn-lg px-5 rounded-pill fw-bold shadow">
+                <button onclick="finishLevel()" class="btn btn-pink btn-lg px-5 rounded-pill fw-bold shadow">
                     <i class="fas fa-check-circle me-2"></i> I FINISHED THE LESSON
                 </button>
             </div>
             {% endif %}
-
-            <div id="victory-ui" class="d-none animate__animated animate__bounceIn">
-                <div class="py-4">
-                    <h1 class="display-1 text-warning mb-3">⭐ ⭐ ⭐</h1>
-                    <h2 class="display-4 fw-bold text-success">EXCELLENT WORK!</h2>
-                    
-                    <p class="fs-4 text-muted" id="progress-status">
-                        Recording progress for {{ child.name|default:"Tester" }}...
-                    </p>
-                    
-                    <div id="total-stars-badge" class="badge bg-soft-pink text-pink rounded-pill px-4 py-2 fs-5 d-none">
-                        Total Stars: <span id="star-count">0</span>
-                    </div>
-                </div>
-                
-                <div class="d-grid gap-3 d-sm-flex justify-content-center">
-                    <button onclick="saveAndExit()" class="btn btn-success btn-lg rounded-pill px-5 py-3 fw-bold shadow">
-                        FINISH & SAVE
-                    </button>
-                </div>
-            </div>
 
             <div class="mt-5 pt-4 border-top">
                 <a href="{% url 'exit_child_gate' %}" class="btn btn-outline-secondary rounded-pill px-4">
@@ -66,31 +45,42 @@
     </div>
 </div>
 
-
-
 <script>
-    // Defensive URL handling to prevent server-side ValueErrors
     const mediaUrl = "{% if lesson.file %}{{ lesson.file.url }}{% else %}{% endif %}";
     const mode = "{{ mode }}";
     const container = document.getElementById('activity-container');
     const title = document.getElementById('game-title');
     const instruction = document.getElementById('game-instruction');
 
-    // Loader for Custom JavaScript Activities/Games
-    function initCustomJSGame() {
-        title.innerText = "🚀 Activity: {{ lesson.title }}";
-        instruction.innerText = "Playing Custom JS Game";
-        const script = document.createElement('script');
-        script.src = mediaUrl;
-        script.onload = () => {
-            if (typeof startNeuroGame === "function") {
-                startNeuroGame(container, checkVictory);
+    // NEW Logic: Integrated AJAX completion with Redirect
+    function finishLevel() {
+        const lessonId = "{{ lesson.id }}";
+        
+        fetch(`/activity/complete/${lessonId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}', // CRITICAL: Prevents 403/500 errors
+                'Content-Type': 'application/json'
             }
-        };
-        document.head.appendChild(script);
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert("Great Job! You earned 3 stars!");
+                // Direct redirect to portal after success
+                {% if child %}
+                    window.location.href = "{% url 'skill_selection_portal' child.id %}";
+                {% else %}
+                    window.location.href = "{% url 'admin_dashboard' %}";
+                {% endif %}
+            }
+        })
+        .catch(err => {
+            console.error("Tracking Error:", err);
+            alert("Progress saved locally.");
+        });
     }
 
-    // Built-in Matching Game Engine
     function initMatching() {
         title.innerText = "🧩 Picture Match";
         instruction.innerText = "Tap both identical items!";
@@ -103,53 +93,20 @@
                 el.style.background="#e8f5e9"; 
                 el.classList.add('animate__animated', 'animate__pulse');
                 count++; 
-                if(count==2) checkVictory(); 
+                if(count==2) finishLevel(); // Trigger the integrated finish logic
             };
             container.appendChild(el);
         });
     }
 
-    // Core Tracking System: Triggers AJAX to record completion and update rewards
-    function checkVictory() {
-        container.classList.add('d-none');
-        if(document.getElementById('manual-complete')) document.getElementById('manual-complete').classList.add('d-none');
-        document.getElementById('header-area').classList.add('d-none');
-        document.getElementById('victory-ui').classList.remove('d-none');
-
-        // Records progress in the ActivityProgress model
-        fetch("{% url 'record_completion' lesson.id %}", {
-            method: "POST",
-            headers: { 
-                "X-CSRFToken": "{{ csrf_token }}",
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // Live UI update based on database response
-                document.getElementById('progress-status').innerText = `You earned ${data.stars_earned} stars!`;
-                document.getElementById('star-count').innerText = data.total_stars;
-                document.getElementById('total-stars-badge').classList.remove('d-none');
-            }
-        })
-        .catch(err => {
-            console.error("System Tracking Error:", err);
-            document.getElementById('progress-status').innerText = "Progress recorded locally.";
-        });
-    }
-
-    // Safe Redirects: Distinguishes between Student and Admin preview modes
-    function saveAndExit() {
-        {% if child %}
-            window.location.href = "{% url 'skill_lessons_view' child.id lesson.skill_category %}";
-        {% else %}
-            window.location.href = "{% url 'admin_dashboard' %}";
-        {% endif %}
-    }
-
     window.onload = () => {
-        if (mode === 'js_game') initCustomJSGame();
+        if (mode === 'js_game') {
+            title.innerText = "🚀 Activity: {{ lesson.title }}";
+            const script = document.createElement('script');
+            script.src = mediaUrl;
+            script.onload = () => { if (typeof startNeuroGame === "function") startNeuroGame(container, finishLevel); };
+            document.head.appendChild(script);
+        } 
         else if (mode === 'matching') initMatching();
         else {
             title.innerText = "{{ lesson.title }}";

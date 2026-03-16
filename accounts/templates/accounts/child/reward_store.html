@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Star Shop | NeuroSkills{% endblock %}
+
+{% block content %}
+<div class="reward-portal min-vh-100 py-5" style="background: #fff5f8;">
+    <div class="container text-center">
+        <div class="d-inline-flex align-items-center bg-white p-4 rounded-5 shadow-lg border-bottom border-pink border-5 mb-5 animate__animated animate__bounceIn">
+            <i class="fas fa-star text-warning fa-3x me-3"></i>
+            <div class="text-start">
+                <h1 class="fw-bold text-dark mb-0" id="current-star-balance">{{ total_stars }}</h1>
+                <small class="text-muted fw-bold">STARS COLLECTED</small>
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% for reward in rewards %}
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm rounded-5 p-4 h-100 reward-card">
+                    <div class="icon-circle bg-light mb-3 mx-auto">
+                        <i class="fas {{ reward.icon }} fa-2x text-pink"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">{{ reward.name }}</h5>
+                    <p class="small text-muted">Cost: {{ reward.cost }} Stars</p>
+                    
+                    <button onclick="unlockReward('{{ reward.id }}', {{ reward.cost }})" 
+                            id="btn-{{ reward.id }}"
+                            class="btn btn-pink rounded-pill px-4 fw-bold {% if total_stars < reward.cost %}disabled opacity-50{% endif %}">
+                        {% if total_stars >= reward.cost %}Unlock Now{% else %}Need More Stars{% endif %}
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-5">
+            <a href="{% url 'skill_selection_portal' child.id %}" class="btn btn-outline-secondary rounded-pill px-5 fw-bold">
+                <i class="fas fa-arrow-left me-2"></i>Back to Skills
+            </a>
+        </div>
+    </div>
+</div>
+
+<canvas id="rewardCanvas" style="position:fixed; top:0; left:0; pointer-events:none; z-index:9999;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+/**
+ * Core Logic: Handles star deduction, UI state, and custom animations
+ */
+function unlockReward(type, cost) {
+    const starDisplay = document.getElementById('current-star-balance');
+    let currentBalance = parseInt(starDisplay.innerText);
+
+    // 1. Validation Check
+    if (currentBalance < cost) {
+        alert("Keep practicing to earn more stars!");
+        return;
+    }
+
+    // 2. UI Deduction: Immediate reinforcement
+    currentBalance -= cost;
+    starDisplay.innerText = currentBalance;
+    
+    // Disable buttons that the user can no longer afford
+    document.querySelectorAll('.reward-card button').forEach(btn => {
+        const btnCost = parseInt(btn.parentElement.querySelector('p').innerText.replace(/\D/g,''));
+        if (currentBalance < btnCost) {
+            btn.classList.add('disabled', 'opacity-50');
+            btn.innerText = "Need More Stars";
+        }
+    });
+
+    // 3. Animation Router
+    if (type === 'confetti') {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#f06292', '#fce4ec', '#ff80ab']
+        });
+    } else if (type === 'fireworks') {
+        const duration = 3 * 1000;
+        const animationEnd = Date.now() + duration;
+        const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            confetti({ 
+                startVelocity: 30, spread: 360, ticks: 60, zIndex: 0,
+                particleCount: 40, 
+                origin: { x: Math.random(), y: Math.random() - 0.2 } 
+            });
+        }, 200);
+    } else if (type === 'balloon') {
+        // Feature: Balloon Party (Slow, rising scalar particles for sensory safety)
+        const end = Date.now() + (3 * 1000);
+        (function frame() {
+            confetti({
+                particleCount: 3,
+                angle: 90,
+                spread: 45,
+                origin: { x: Math.random(), y: 0.9 },
+                colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'],
+                ticks: 300,
+                gravity: 0.4,
+                scalar: 2.5 // Makes them appear large and balloon-like
+            });
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
+}
+</script>
+
+<style>
+    .bg-soft-pink { background-color: #fce4ec; }
+    .text-pink { color: #f06292 !important; }
+    .btn-pink { background-color: #f06292; color: white; border: none; }
+    .reward-card { transition: 0.3s; border: 3px solid transparent !important; background: white; }
+    .reward-card:hover:not(:has(.disabled)) { 
+        transform: translateY(-10px); 
+        border-color: #f06292 !important;
+        box-shadow: 0 1rem 3rem rgba(240, 98, 146, 0.15) !important;
+    }
+    .icon-circle { 
+        width: 80px; height: 80px; 
+        background-color: #fdf2f5; 
+        border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+    }
+</style>
+{% endblock %}

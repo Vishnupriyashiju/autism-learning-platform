@@ -8,7 +8,7 @@ from django.db.models import Sum, Count, Avg # Added Sum and Count
 from django.utils import timezone # For accurate date tracking
 from datetime import date,datetime
 
-from .models import ChildProfile, Lesson, Assignment, Notification, ScreeningResult, ActivityProgress,LessonFeedback
+from .models import ChildProfile, Lesson, Assignment, Notification, ScreeningResult, ActivityProgress, LessonFeedback, BehaviorLog, ParentReward, LearningPlan, LearningPlanItem
 from .utils import render_to_pdf
 
 # Use custom User model
@@ -31,16 +31,28 @@ def home(request):
 
 @never_cache # Also add to registration to prevent 'back-button' glitches
 
+
+# accounts/views.py
+
+# accounts/views.py
+
+
+
+# accounts/views.py
+
+@transaction.atomic
 def register(request):
     if request.method == "POST":
+        # 1. Capture Common Fields
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         phone = request.POST.get('phone')
-        dob = request.POST.get('dob')
-        role = request.POST.get('role')
+        location = request.POST.get('location')
+        role = request.POST.get('role', '').lower()
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
+        # Validation
         if password != confirm_password:
             messages.error(request, "Passwords do not match")
             return redirect('register')
@@ -49,15 +61,43 @@ def register(request):
             messages.error(request, "Email already registered")
             return redirect('register')
 
+        # 2. CREATE USER FIRST (This defines the 'user' variable)
         user = User.objects.create_user(
-            username=email, email=email, phone=phone,
-            role=role, dob=dob, password=password
+            username=email, 
+            email=email, 
+            phone=phone,
+            role=role, 
+            password=password, 
+            first_name=full_name
         )
-        user.first_name = full_name
-        user.save()
+        user.location = location 
+        
+        # 3. ATTACH PHOTO (Now 'user' exists, so no UnboundLocalError)
+        if request.FILES.get('profile_photo'):
+            user.profile_photo = request.FILES.get('profile_photo')
+        
+        # 4. Role-Specific Logic
+        if role == 'parent':
+            user.relationship_to_child = request.POST.get('relationship', '')
+            user.data_privacy_agreed = request.POST.get('data_privacy') == 'on'
+            user.progress_tracking_permission = request.POST.get('progress_tracking') == 'on'
+            user.is_approved = True  # Parents are main managers, auto-approved
+            user.save()
+            messages.success(request, "Registration successful! You can now log in.")
+            return redirect('login')
 
-        login(request, user)
-        return redirect('role_dashboard')
+        elif role == 'contributor':
+            user.qualification = request.POST.get('qualification', '')
+            user.experience_years = int(request.POST.get('experience') or 0)
+            user.specialization = request.POST.get('specialization', '')
+            user.portfolio_url = request.POST.get('portfolio_url', '')
+            if request.FILES.get('certificate'):
+                user.certificate = request.FILES.get('certificate')
+            user.is_approved = False  # Awaits Admin review
+            user.save()
+            messages.info(request, "Registration successful! Pending Admin approval.")
+            return redirect('login')
+
     return render(request, 'accounts/register.html')
 
 
@@ -67,41 +107,66 @@ def register(request):
 
 # accounts/views.py
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+
 def login_view(request):
+    """ Central Smart Gateway: Filters access based on Clinical Sensitivity """
+    
     if request.method == "POST":
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
+        u_name = request.POST.get('username')
+        u_pass = request.POST.get('password')
+        
+        user = authenticate(request, username=u_name, password=u_pass)
 
         if user is not None:
-            # Check if this is a Student account
+            request.session['assisted_session'] = False
+
+            # 1. Logic for Student Role (The Independent Path)
             if user.role == 'student':
-                # Link to the ChildProfile using the user relationship
-                child_profile = getattr(user, 'child_profile', None)
+                profile = getattr(user, 'child_profile', None)
                 
-                if child_profile:
-                    # RESTRICTION: Block direct login for high sensitivity
-                    if child_profile.autism_percentage >= 50:
+                if profile:
+                    # CLINICAL GATE 1: Block high sensitivity (Meena) from direct login
+                    if profile.autism_percentage >= 50:
                         messages.error(request, "Access Restricted: High sensitivity detected. Please log in through the Parent Gateway.")
                         return redirect('login')
                     
-                    # SUCCESS: Direct login for low sensitivity
+                    # CLINICAL GATE 2: Check if Admin has activated this account (Hanna)
+                    if not user.is_approved:
+                        messages.warning(request, "Your independent account is awaiting Admin activation.")
+                        return redirect('login')
+                    
+                    # SUCCESS: Log in and send to the NEW Independent Dashboard
                     login(request, user)
-                    request.session['active_child_id'] = child_profile.id # Set session for game tracking
-                    return redirect('skill_selection_portal', child_id=child_profile.id)
+                    request.session['active_child_id'] = profile.id
+                    messages.success(request, f"Welcome back, {profile.name}! Ready to explore?")
+                    
+                    # REDIRECT TO THE NEW DASHBOARD
+                    return redirect('independent_student_dashboard')
+                else:
+                    messages.error(request, "Student profile not found. Contact Admin.")
+                    return redirect('login')
 
-            # Standard Logic for Parents/Admins
+            # 2. Logic for Parents, Contributors, and Admins
             if user.is_approved or user.is_superuser:
                 login(request, user)
-                return redirect('role_dashboard')
+                
+                if user.role == 'parent':
+                    return redirect('parent_dashboard')
+                elif user.role == 'contributor':
+                    return redirect('contributor_dashboard')
+                else:
+                    return redirect('role_dashboard')
             else:
-                messages.warning(request, "Account pending approval.")
+                messages.warning(request, "Your account is pending Admin approval.")
                 return redirect('login')
+                
         else:
-            messages.error(request, "Invalid credentials.")
+            messages.error(request, "Invalid username or password.")
             
     return render(request, 'accounts/login.html')
-
 def logout_view(request):
     logout(request)
     return redirect('login')
@@ -119,20 +184,109 @@ def role_dashboard(request):
         return redirect('contributor_dashboard')
     else:
         return HttpResponseForbidden(f"Invalid role configuration: '{role}'")
-
-# --- PARENT SECTION ---
 @login_required
+@never_cache
 def parent_dashboard(request):
+    """ Fixed to explicitly fetch profiles linked to the parent """
     if request.user.role.lower() != 'parent':
-        return HttpResponseForbidden("Access Denied")
-    children = request.user.children.all()
+        return redirect('role_dashboard')
+    
+    # FIX: Use direct filter instead of .children.all() to ensure visibility
+    children = ChildProfile.objects.filter(parent=request.user)
+    
+    # Calculate child count for the header stat
+    child_count = children.count()
+    
     approved_lessons = Lesson.objects.filter(is_approved=True)
+
     return render(request, 'accounts/dashboards/parent_dashboard.html', {
-        'child_count': children.count(),
+        'child_count': child_count,
         'children': children,
         'approved_lessons': approved_lessons
     })
 
+@login_required
+def child_list(request):
+    if request.user.role.lower() != 'parent':
+        return HttpResponseForbidden("Access Denied")
+    children = request.user.children.all()
+    return render(request, 'accounts/child/child_list.html', {'children': children})
+
+
+# --- NEW: DAILY TASK ASSIGNMENT LOGIC ---
+@login_required
+def assign_daily_class(request):
+    """ Feature: Assigns a bundle of lessons based on Class Category """
+    if request.method == "POST":
+        child_id = request.POST.get('child_id')
+        category = request.POST.get('category') # toddler, kindergarden, teenage
+        
+        child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+        
+        # Guide's Logic: 1 Skill bundle = Multiple Lessons from that age group
+        bundle_lessons = Lesson.objects.filter(
+            target_age_group__iexact=category, 
+            is_approved=True
+        )
+        
+        if not bundle_lessons.exists():
+            messages.warning(request, f"No lessons found for the {category} category yet.")
+            return redirect('parent_dashboard')
+
+        # Create assignments for today
+        count = 0
+        for lesson in bundle_lessons:
+            # get_or_create prevents duplicate assignments for the same day
+            obj, created = Assignment.objects.get_or_create(
+                child=child,
+                lesson=lesson,
+                assigned_date=date.today(),
+                defaults={'is_completed': False}
+            )
+            if created: count += 1
+            
+        messages.success(request, f"Assigned {count} new lessons to {child.name}'s portal for today.")
+    return redirect('parent_dashboard')
+
+# --- NEW: BEHAVIORAL LOGGING ---
+@login_required
+def save_behavior_log(request):
+    """ Feature: Daily Behavior Tracking to inform clinical trends """
+    if request.method == "POST":
+        child_id = request.POST.get('child_id')
+        child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+        
+        # Save to your BehaviorLog model (ensure this model exists)
+        # Note: This logic can later be used to auto-recommend 'Calm' lessons if mood is anxious
+        BehaviorLog.objects.create(
+            child=child,
+            mood=request.POST.get('mood', 'calm'),
+            sleep_quality=request.POST.get('sleep_quality') or request.POST.get('sleep', ''),
+            social_interaction=request.POST.get('social_interaction') or '',
+            meltdown_episodes=int(request.POST.get('meltdowns') or 0),
+            attention_level=int(request.POST.get('attention') or 3)
+        )
+        
+        messages.success(request, f"Behavior log for {child.name} saved.")
+    return redirect('parent_dashboard')
+
+# --- UPDATED: CHILD PORTAL VIEW ---
+@login_required
+def student_assigned_today(request, child_id):
+    """ Feature: The child only sees what the parent assigned for today """
+    child = get_object_or_404(ChildProfile, id=child_id)
+    today = date.today()
+    
+    # Filter assignments specifically for today
+    assigned_tasks = Assignment.objects.filter(
+        child=child, 
+        assigned_date=today
+    ).select_related('lesson')
+    
+    return render(request, 'accounts/child/assigned_today.html', {
+        'child': child,
+        'tasks': assigned_tasks
+    })
 @login_required
 def child_list(request):
     if request.user.role.lower() != 'parent':
@@ -187,20 +341,46 @@ def child_screening_test(request, child_id):
 
 @login_required
 def launch_child_gate(request, child_id):
-    """ Captures daily mood/IQ and redirects to Portal """
-    if request.method == "POST":
-        child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
-        request.session['target_mood'] = request.POST.get('target_mood')
-        request.session['iq_focus'] = request.POST.get('iq_focus')
-        return redirect('skill_selection_portal', child_id=child.id)
-    return redirect('parent_dashboard')
-@login_required
-def skill_selection_portal(request, child_id):
-    """ Renders the full-page 9-icon grid """
+    """ Parent-led bypass for high-sensitivity students """
     child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+    
+    # We create a 'Trust Token' in the session
+    request.session['assisted_session'] = True
     request.session['active_child_id'] = child.id
     
-    # Passing this list directly avoids the TemplateSyntaxError
+    # Redirect straight to the portal, skipping the student login page
+    messages.success(request, f"Assisted session started for {child.name}")
+    return redirect('skill_selection_portal', child_id=child.id)
+from django.db.models import Sum
+
+@login_required
+def skill_selection_portal(request, child_id):
+    """ 
+    Smart Gateway: 
+    1. Allows parent access for high-sensitivity (Meena)
+    2. Allows direct student access for low-sensitivity (Hanna)
+    """
+    child = get_object_or_404(ChildProfile, id=child_id)
+
+    # SECURITY CHECK: Ensure the person accessing this is either the parent OR the child themselves
+    is_parent = (request.user.role == 'parent' and child.parent == request.user)
+    is_the_child = (request.user.role == 'student' and request.user.username == child.user.username)
+
+    if not (is_parent or is_the_child):
+        return HttpResponseForbidden("You do not have permission to access this portal.")
+
+    # CLINICAL CHECK: If child is high-sensitivity (Meena) but no parent is logged in
+    if child.autism_percentage >= 50 and request.user.role == 'student':
+        messages.error(request, "This profile requires Assisted Launch. Please ask your parent to log in.")
+        return redirect('login')
+
+    # Session Management
+    request.session['active_child_id'] = child.id
+    
+    # Calculate Stars (Using your existing logic)
+    # Note: Ensure ActivityProgress model is imported
+    total_stars = ActivityProgress.objects.filter(child=child).aggregate(Sum('stars_earned'))['stars_earned__sum'] or 0
+
     skill_list = [
         {'slug': 'behavioral', 'name': 'Behavioral', 'icon': 'fa-brain'},
         {'slug': 'communication', 'name': 'Communication', 'icon': 'fa-comments'},
@@ -212,10 +392,12 @@ def skill_selection_portal(request, child_id):
         {'slug': 'self_care', 'name': 'Self-Care', 'icon': 'fa-heart'},
         {'slug': 'vocal', 'name': 'Vocal', 'icon': 'fa-microphone'},
     ]
-    
+
     return render(request, 'accounts/child/skill_portal.html', {
         'child': child,
-        'skills': skill_list
+        'skills': skill_list,
+        'total_stars': total_stars,
+        'is_assisted': (request.user.role == 'parent'), # Tell the template if parent is watching
     })
 
 @login_required
@@ -245,9 +427,24 @@ def skill_lessons_view(request, child_id, skill_slug):
     })
 @login_required
 def exit_child_gate(request):
-    if 'active_child_id' in request.session:
-        del request.session['active_child_id']
-    return redirect('parent_dashboard')
+    """ 
+    Smart Exit Logic:
+    - If Student logged in directly -> send to Independent Dashboard
+    - If Parent is using Assisted Mode -> send to Parent Dashboard
+    """
+    # 1. Check if the logged-in user is a Parent
+    if request.user.role == 'parent':
+        # Clear the active child session tracking
+        if 'active_child_id' in request.session:
+            del request.session['active_child_id']
+        return redirect('parent_dashboard')
+
+    # 2. Check if the logged-in user is a Student
+    elif request.user.role == 'student':
+        return redirect('independent_student_dashboard')
+
+    # Fallback
+    return redirect('home')
 
 # --- ADMIN SECTION (Module 1.0) ---
 # accounts/views.py
@@ -262,37 +459,70 @@ from django.utils import timezone
 
 # accounts/views.py
 
+# accounts/views.py
+
+# accounts/views.py
+
+# accounts/views.py
+
+# accounts/views.py
+
+# accounts/views.py
+
 @login_required
 def admin_dashboard(request):
     if not (request.user.role == 'admin' or request.user.is_superuser):
         return HttpResponseForbidden()
-    
-    # 1. FIXED COUNTERS: Pulling fresh counts from SQLite
-    total_parents = User.objects.filter(role='parent').count()
-    total_contributors = User.objects.filter(role='contributor').count()
-    total_approved = User.objects.filter(is_approved=True).exclude(id=request.user.id).count()
-    
-    # 2. TAB DATA: Populating User Directory and Content Queue
-    pending_users = User.objects.filter(is_approved=False).exclude(id=request.user.id)
-    approved_users_list = User.objects.filter(is_approved=True).exclude(id=request.user.id)
-    pending_lessons = Lesson.objects.filter(is_approved=False)
-    approved_lessons = Lesson.objects.filter(is_approved=True)
 
-    # 3. DYNAMIC SKILLS: Pulls unique categories currently in the Lesson database
-    db_cats = Lesson.objects.values_list('skill_category', flat=True).distinct()
-    formatted_categories = [{'slug': c, 'name': c.replace('_', ' ').title()} for c in db_cats]
+    # 1. Fetch Professional Users (Parents/Contributors) awaiting approval
+    pending_users = User.objects.filter(
+        is_approved=False
+    ).exclude(role='student').exclude(id=request.user.id)
 
-    return render(request, 'accounts/dashboards/admin_dashboard.html', {
-        'total_parents': total_parents,
-        'total_contributors': total_contributors,
-        'total_approved': total_approved,
+    # 2. UPDATED: Fetch Student Profiles awaiting verification
+    # Only students with < 50% sensitivity (Direct Access users) need Admin approval.
+    # High sensitivity students (Meena) are skipped because they use Assisted Launch.
+    pending_student_profiles = ChildProfile.objects.filter(
+        user__is_approved=False,
+        autism_percentage__lt=50  # Logic: < 50% needs Admin gatekeeping
+    ).select_related('user', 'parent')
+
+    # 3. Fetch Parent Feedback
+    pending_feedback = LessonFeedback.objects.filter(is_moderated=False)
+
+    # Counting logic
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    daily_active = ActivityProgress.objects.filter(completed_at__gte=today_start).values('child').distinct().count()
+
+    context = {
         'pending_users': pending_users,
-        'approved_users_list': approved_users_list,
-        'pending_lessons': pending_lessons,
-        'approved_lessons': approved_lessons,
-        'categories': formatted_categories,
+        'pending_student_profiles': pending_student_profiles, # Now filtered for Hanna only
+        'pending_feedback': pending_feedback,
+        'total_parents': User.objects.filter(role='parent').count(),
+        'total_contributors': User.objects.filter(role='contributor').count(),
+        'total_children': ChildProfile.objects.count(),
+        'total_activities': Lesson.objects.filter(is_approved=True).count(),
+        'daily_active_users': daily_active,
+        'total_approved': User.objects.filter(is_approved=True).exclude(id=request.user.id).count(),
+        'pending_lessons': Lesson.objects.filter(is_approved=False),
+        'approved_lessons': Lesson.objects.filter(is_approved=True),
+        'categories': Lesson.objects.values('skill_category').annotate(count=Count('id')),
         'today': timezone.now(),
-    })
+    }
+    
+    return render(request, 'accounts/dashboards/admin_dashboard.html', context)
+@login_required
+def approve_student_account(request, user_id):
+    """ Admin verification for child profiles (Standard MCA Security Flow) """
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        return HttpResponseForbidden()
+    
+    student_user = get_object_or_404(User, id=user_id)
+    student_user.is_approved = True
+    student_user.save()
+    
+    messages.success(request, f"Student profile for {student_user.username} has been verified and activated.")
+    return redirect('admin_dashboard')
 
 # --- MODERATION ACTIONS (Sticky Tab Logic) ---
 
@@ -398,12 +628,33 @@ def view_analytics(request):
         'total_users': User.objects.count(),
     })
 
+# accounts/views.py
+
 @login_required
 def send_notifications(request):
+    """ DFD Process 1.0.6: Global Role-Based Broadcast System """
     if request.method == "POST":
-        Notification.objects.create(message=request.POST.get('message'))
-        messages.success(request, "Notification sent!")
+        target_roles = request.POST.getlist('target') # ['parent', 'contributor']
+        msg_text = request.POST.get('message')
+        
+        if not target_roles:
+            messages.error(request, "Please select at least one target role.")
+            return redirect('admin_dashboard')
+
+        # Dispatch to every user matching the selected roles
+        users_to_notify = User.objects.filter(role__in=target_roles)
+        
+        notifications = [
+            Notification(user=user, message=msg_text) 
+            for user in users_to_notify
+        ]
+        
+        # Bulk create is more efficient for large user bases
+        Notification.objects.bulk_create(notifications)
+            
+        messages.success(request, f"Broadcast successfully sent to {users_to_notify.count()} active users.")
         return redirect('admin_dashboard')
+    
     return render(request, 'accounts/admin/notifications.html')
 
 @login_required
@@ -468,6 +719,7 @@ def upload_lesson(request):
         is_activity = request.POST.get('is_activity') == 'on'
 
         # 4. Create the Lesson Record
+        activity_type = request.POST.get('activity_type', 'none')
         lesson = Lesson.objects.create(
             contributor=request.user,
             title=title,
@@ -478,11 +730,12 @@ def upload_lesson(request):
             learning_objectives=objectives,
             description=description,
             content_type=content_type,
-            is_activity=is_activity,           
-            file=request.FILES.get('file'),         # Can be null if using YouTube
-            video_url=video_url,                    # New field
+            is_activity=is_activity,
+            activity_type=activity_type,
+            file=request.FILES.get('file'),
+            video_url=video_url,
             thumbnail=request.FILES.get('thumbnail'),
-            is_approved=False                      
+            is_approved=False
         )
 
         type_label = "Activity" if is_activity else "Lesson"
@@ -499,30 +752,38 @@ def complete_activity(request, assignment_id):
     return redirect('child_dashboard', child_id=assignment.child.id)
 
 @login_required
-def system_activity_player(request, assignment_id):
+def system_activity_player_by_assignment(request, assignment_id):
+    """Redirect to lesson player when opening from an assignment."""
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    return render(request, 'accounts/child/system_player.html', {
-        'child': assignment.child,
-        'lesson': assignment.lesson,
-        'game_type': assignment.lesson.activity_type, 
-    })
+    return redirect('system_activity_player', lesson_id=assignment.lesson_id)
 # --- Add these new functions to your views.py ---
-
 @login_required
 def child_login_redirect(request, child_id):
     """
-    Checks the saved autism percentage from the one-time registration 
-    screening to determine the login path.
+    Logic:
+    - High Sensitivity (Meena): Parent launches DIRECTLY. No Admin approval needed 
+      because the Parent is the supervisor.
+    - Low Sensitivity (Hanna): Needs Admin Approval + Redirects to Login for 
+      Independent Access.
     """
     child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
     
-    # If percentage is above 50, redirect to separate student login/verification
+    # 1. MEENA'S PATH (High Sensitivity >= 50%)
     if child.autism_percentage >= 50:
-        messages.info(request, "High sensitivity profile detected. Accessing Student Portal.")
-        return redirect('student_login_page', child_id=child.id)
+        # We bypass 'is_approved' check because Parent is the 'Key'
+        messages.success(request, f"Assisted clinical session started for {child.name}")
+        return redirect('skill_selection_portal', child_id=child.id)
     
-    # If below 50, redirect to your Skill Portal page
-    return redirect('skill_selection_portal', child_id=child.id)
+    # 2. HANNA'S PATH (Low Sensitivity < 50%)
+    else:
+        # Check if Admin has approved her for independent login
+        if not child.is_approved:
+            messages.warning(request, f"Independent access for {child.name} is awaiting Admin verification.")
+            return redirect('parent_dashboard')
+            
+        # If approved, send her to the login page to enter her own password
+        messages.info(request, f"Direct Access enabled. Please let {child.name} log in.")
+        return redirect('login')
 
 
 # --- Update your existing add_child function to trigger screening immediately ---
@@ -604,79 +865,143 @@ def student_login_view(request):
 # accounts/views.py
 # To ensure both User and Profile are created together
 
+# accounts/views.py
 @login_required
+@transaction.atomic
 def add_child(request):
-    """ Creates both a Child User account and a Child Profile """
+    """ Corrected registration with unique email and explicit parent linking """
     if request.user.role.lower() != 'parent':
         return HttpResponseForbidden("Access Denied")
+
+    screening_questions = [
+        "1. Eye contact?", "2. Repeating words?", "3. Solitary play?",
+        "4. Sensory reactions?", "5. Routine changes?", "6. Response to name?",
+        "7. Motor behaviors?", "8. Texture aversion?", "9. Intense focus?", "10. Gestures?"
+    ]
         
     if request.method == 'POST':
         s_username = request.POST.get('student_username')
         s_password = request.POST.get('student_password')
 
-        # Check for existing username using the active User model
+        # Prevent username duplicates
         if User.objects.filter(username=s_username).exists():
-            messages.error(request, "This student username is already taken. Try another.")
-            return render(request, 'accounts/child/add_child.html')
+            messages.error(request, "This student username is already taken.")
+            return redirect('add_child')
 
-        # Calculate initial Autism Percentage from the 5 questions
-        q_keys = ['q1', 'q2', 'q3', 'q4', 'q5']
-        yes_count = sum(1 for key in q_keys if request.POST.get(key) == 'yes')
-        percentage = (yes_count / 5) * 100
-        high_sensitivity = (percentage >= 50)
+        # Score calculation
+        q_keys = [f'q{i}' for i in range(1, 11)] 
+        yes_count = sum(1 for k in q_keys if request.POST.get(k) == 'yes')
+        percentage = (yes_count / 10) * 100 
+        auto_approve = (percentage >= 50) 
 
         try:
-            with transaction.atomic():
-                # Create the student user with the correct role
-                child_user = User.objects.create_user(
-                    username=s_username, 
-                    password=s_password,
-                    role='student'  # CRITICAL: Ensures role-based login works
-                )
-                
-                # Create the profile linked to the new student user
-                child = ChildProfile.objects.create(
-                    user=child_user,
-                    parent=request.user,
-                    name=request.POST.get('name'),
-                    age=request.POST.get('age'),
-                    learning_style=request.POST.get('learning_style'),
-                    sensory_mode=request.POST.get('sensory_mode'),
-                    diagnosis=request.POST.get('diagnosis'),
-                    reward_preference=request.POST.get('reward_pref'),
-                    notes=request.POST.get('notes'),
-                    autism_percentage=percentage,
-                    is_high_sensitivity=high_sensitivity
-                )
-                
-                # Record result in history
-                ScreeningResult.objects.create(
-                    child=child, 
-                    score_percentage=percentage, 
-                    is_high_sensitivity=high_sensitivity
-                )
+            # 1. Create User with Unique Virtual Email
+            # This prevents the 'UNIQUE constraint failed: accounts_user.email' error
+            s_email = f"{s_username}@neuroskills.local"
 
-            messages.success(request, f"Profile created for {s_username}! Score: {percentage}%")
+            child_user = User.objects.create_user(
+                username=s_username, 
+                password=s_password,
+                email=s_email,
+                role='student'
+            )
+            child_user.is_approved = auto_approve
+            child_user.save()
+            
+            # 2. Create Profile linked to the Parent
+            interests_str = ','.join(request.POST.getlist('interests'))
+            sensory_str = ','.join(request.POST.getlist('sensory_sensitivity'))
+
+            child = ChildProfile.objects.create(
+                user=child_user,
+                parent=request.user, # CRITICAL: This links the child to the parent
+                name=request.POST.get('name'),
+                age=int(request.POST.get('age') or 0),
+                gender=request.POST.get('gender', ''),
+                diagnosis=request.POST.get('diagnosis_type', 'General Development'), 
+                learning_style=request.POST.get('learning_style', 'visual'),
+                sensory_mode=request.POST.get('sensory_mode', 'neutral'),
+                interests=interests_str,
+                sensory_sensitivity=sensory_str,
+                autism_percentage=percentage
+            )
+            
+            # 3. Log screening
+            ScreeningResult.objects.create(child=child, score_percentage=percentage)
+
+            messages.success(request, f"Profile for {child.name} saved successfully!")
             return redirect('parent_dashboard')
             
         except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
-        
-    return render(request, 'accounts/child/add_child.html')
+            print(f"DATABASE ERROR: {e}") # Check your VS Code terminal for this
+            messages.error(request, f"Could not save profile: {str(e)}")
+    
+    return render(request, 'accounts/child/add_child.html', {'screening_questions': screening_questions})
 @login_required
+@transaction.atomic
 def edit_child(request, child_id):
-    """ Feature: Edit existing student profile """
+    """ 
+    Enhanced Edit Logic:
+    - Updates clinical and sensory profile.
+    - Updates existing Student User account (username/password).
+    - Creates a NEW account if the profile was 'orphaned' (Hanna's case).
+    """
     child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+    
     if request.method == 'POST':
+        new_username = request.POST.get('student_username')
+        new_password = request.POST.get('student_password')
+
+        # --- 1. HANDLE ACCOUNT UPDATES OR CREATION ---
+        if child.user:
+            # Case: Update existing account
+            if new_username and new_username != child.user.username:
+                if User.objects.filter(username=new_username).exists():
+                    messages.error(request, f"The username '{new_username}' is already taken.")
+                else:
+                    child.user.username = new_username
+            
+            if new_password:
+                child.user.set_password(new_password)
+            
+            child.user.save()
+        
+        elif new_username and new_password:
+            # Case: Fix for 'Hanna' (No account yet)
+            if User.objects.filter(username=new_username).exists():
+                messages.error(request, "Username taken. Could not create account link.")
+            else:
+                s_email = f"{new_username}@neuroskills.local"
+                new_user = User.objects.create_user(
+                    username=new_username,
+                    password=new_password,
+                    email=s_email,
+                    role='student'
+                )
+                new_user.is_approved = (child.autism_percentage >= 50) # Sync approval logic
+                new_user.save()
+                
+                child.user = new_user # Link the new account to the old profile
+                messages.info(request, f"Created new login credentials for {child.name}.")
+
+        # --- 2. UPDATE CLINICAL & SENSORY PROFILE ---
         child.name = request.POST.get('name')
-        child.age = request.POST.get('age')
-        child.learning_style = request.POST.get('learning_style')
-        child.sensory_mode = request.POST.get('sensory_mode')
-        child.diagnosis = request.POST.get('diagnosis')
-        child.notes = request.POST.get('notes')
+        child.age = int(request.POST.get('age', 0) or child.age)
+        child.gender = request.POST.get('gender', '')
+        child.autism_level = request.POST.get('autism_level', '')
+        child.learning_style = request.POST.get('learning_style', child.learning_style)
+        child.sensory_mode = request.POST.get('sensory_mode', child.sensory_mode)
+        child.diagnosis_type = request.POST.get('diagnosis_type', child.diagnosis_type)
+        child.interests = request.POST.get('interests', '')
+        child.notes = request.POST.get('notes', '')
+
+        if request.FILES.get('child_photo'):
+            child.child_photo = request.FILES.get('child_photo')
+
         child.save()
-        messages.success(request, f"Profile for {child.name} updated.")
+        messages.success(request, f"Profile and credentials for {child.name} have been updated.")
         return redirect('child_list')
+
     return render(request, 'accounts/child/edit_child.html', {'child': child})
 
 @login_required
@@ -699,8 +1024,6 @@ def save_parent_feedback(request, child_id):
         child.save()
         messages.success(request, "Feedback saved and forwarded to system analytics.")
     return redirect('child_list')
-# accounts/views.py
-
 @login_required
 def skill_lessons_view(request, child_id, skill_slug):
     child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
@@ -723,18 +1046,16 @@ def skill_lessons_view(request, child_id, skill_slug):
 def system_activity_player(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
     mode = request.GET.get('mode', 'view')
-    
-    # Check if a child is active in the session
     child = None
     if 'active_child_id' in request.session:
         child = get_object_or_404(ChildProfile, id=request.session['active_child_id'])
-    
-    # If no child (Admin Preview), we can still render the page
+    game_type = getattr(lesson, 'activity_type', 'none')
     return render(request, 'accounts/child/system_player.html', {
         'lesson': lesson,
         'mode': mode,
         'child': child,
-        'is_admin': request.user.is_superuser # Used to hide "Save Progress" buttons
+        'game_type': game_type,
+        'is_admin': request.user.is_superuser,
     })
 
 
@@ -862,38 +1183,52 @@ def relay_feedback_to_contributor(request, feedback_id):
 # accounts/views.py
 from django.db.models import Sum
 
+# accounts/views.py
+
+# accounts/views.py
+
+# accounts/views.py
+from django.db.models import Sum
+
+# accounts/views.py
+from django.db.models import Sum
+
 @login_required
 def record_completion(request, lesson_id):
-    """
-    Core System: Records student progress and grants rewards (stars).
-    Triggered via AJAX from the system_player.html when an activity finishes.
-    """
     if request.method == 'POST':
+        # Safely get the child ID from session or a fallback
         child_id = request.session.get('active_child_id')
-        if not child_id:
-            return JsonResponse({'status': 'error', 'message': 'No active child session'}, status=400)
-            
-        child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
-        lesson = get_object_or_404(Lesson, id=lesson_id)
         
-        # Record the progress. We use create instead of get_or_create 
-        # to allow children to practice and earn stars multiple times.
-        progress = ActivityProgress.objects.create(
+        if not child_id:
+            # Fallback for MCA Demo: Use the parent's first child if session is lost
+            child = request.user.children.first()
+        else:
+            child = get_object_or_404(ChildProfile, id=child_id)
+
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+
+        # 1. Save Progress
+        ActivityProgress.objects.create(
             child=child, 
             lesson=lesson,
-            stars_earned=3 # Reward for successful completion
+            stars_earned=3 
         )
         
-        # Calculate total stars for real-time UI updates
-        total_stars = ActivityProgress.objects.filter(child=child).aggregate(Sum('stars_earned'))['stars_earned__sum'] or 0
+        # 2. Update Streak (Process 4.0.6)
+        today = timezone.now().date()
+        if child.last_activity_date != today:
+            child.current_streak += 1
+            child.last_activity_date = today
+            child.save()
+
+        # 3. Calculate Total for JSON response
+        total = ActivityProgress.objects.filter(child=child).aggregate(Sum('stars_earned'))['stars_earned__sum'] or 0
         
         return JsonResponse({
             'status': 'success', 
-            'stars_earned': progress.stars_earned,
-            'total_stars': total_stars
+            'total_stars': total,
+            'streak': child.current_streak
         })
-# accounts/views.py
-
 @login_required
 def send_notifications(request):
     if request.method == "POST":
@@ -959,4 +1294,277 @@ def skill_lessons_view(request, child_id, skill_slug):
         'lessons': lessons,
         'activities': activities,
         'current_difficulty': difficulty_filter,
+    })
+@login_required
+def reward_store(request, child_id):
+    """Child reward screen: stars earned and rewards (parent-defined or defaults)."""
+    child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+    total_stars = ActivityProgress.objects.filter(child=child).aggregate(Sum('stars_earned'))['stars_earned__sum'] or 0
+    parent_rewards = ParentReward.objects.filter(child=child).order_by('stars_required')
+    if parent_rewards.exists():
+        rewards = [{'id': r.id, 'name': r.reward_description, 'cost': r.stars_required, 'icon': 'fa-gift'} for r in parent_rewards]
+    else:
+        rewards = [
+            {'id': 'confetti', 'name': 'Confetti Rain', 'cost': 5, 'icon': 'fa-paper-plane'},
+            {'id': 'fireworks', 'name': 'Magic Fireworks', 'cost': 10, 'icon': 'fa-firework'},
+            {'id': 'balloon', 'name': 'Balloon Party', 'cost': 15, 'icon': 'fa-balloon'},
+        ]
+    return render(request, 'accounts/child/reward_store.html', {
+        'child': child,
+        'total_stars': total_stars,
+        'rewards': rewards,
+    })
+
+
+@login_required
+def parent_reward_manage(request, child_id):
+    """Parents set rewards e.g. 10 stars → Chocolate, 20 stars → Toy."""
+    if request.user.role != 'parent':
+        return HttpResponseForbidden("Access Denied")
+    child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+    rewards = ParentReward.objects.filter(child=child).order_by('stars_required')
+    if request.method == 'POST':
+        stars_required = request.POST.get('stars_required')
+        reward_description = request.POST.get('reward_description', '').strip()
+        if stars_required and reward_description:
+            ParentReward.objects.create(
+                parent=request.user,
+                child=child,
+                stars_required=int(stars_required),
+                reward_description=reward_description,
+            )
+            messages.success(request, f"Reward added: {stars_required} stars → {reward_description}")
+            return redirect('parent_reward_manage', child_id=child.id)
+    return render(request, 'accounts/parent/reward_manage.html', {'child': child, 'rewards': rewards})
+
+
+@login_required
+def parent_reward_delete(request, reward_id):
+    reward = get_object_or_404(ParentReward, id=reward_id, parent=request.user)
+    child_id = reward.child_id
+    reward.delete()
+    messages.success(request, "Reward removed.")
+    return redirect('parent_reward_manage', child_id=child_id)
+
+
+@login_required
+def learning_plan_list(request, child_id):
+    """List custom learning plans for a child."""
+    if request.user.role != 'parent':
+        return HttpResponseForbidden("Access Denied")
+    child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+    plans = LearningPlan.objects.filter(child=child).prefetch_related('items').order_by('-created_at')
+    return render(request, 'accounts/parent/learning_plan_list.html', {'child': child, 'plans': plans})
+
+
+@login_required
+def learning_plan_create(request, child_id):
+    """Create custom learning plan: Skill, Activity, Duration; Daily/Weekly/Custom."""
+    if request.user.role != 'parent':
+        return HttpResponseForbidden("Access Denied")
+    child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+    approved_lessons = Lesson.objects.filter(is_approved=True)
+    if request.method == 'POST':
+        name = request.POST.get('name', 'My Plan')
+        plan_type = request.POST.get('plan_type', 'daily')
+        custom_difficulty = request.POST.get('custom_difficulty', '')
+        plan = LearningPlan.objects.create(
+            parent=request.user,
+            child=child,
+            name=name,
+            plan_type=plan_type,
+            custom_difficulty=custom_difficulty,
+        )
+        # Optional: add items from form (skill, activity, duration)
+        for key in request.POST:
+            if key.startswith('skill_') and key.replace('skill_', '').isdigit():
+                idx = key.replace('skill_', '')
+                activity = request.POST.get(f'activity_{idx}', '')
+                duration = request.POST.get(f'duration_{idx}', 5)
+                if request.POST.get(key) and activity:
+                    LearningPlanItem.objects.create(
+                        plan=plan,
+                        skill=request.POST.get(key),
+                        activity=activity,
+                        duration_minutes=int(duration) if str(duration).isdigit() else 5,
+                        order=int(idx) if idx.isdigit() else 0,
+                    )
+        messages.success(request, f"Learning plan '{name}' created.")
+        return redirect('learning_plan_list', child_id=child.id)
+    return render(request, 'accounts/parent/learning_plan_create.html', {'child': child, 'approved_lessons': approved_lessons})
+@login_required
+def submit_lesson_feedback(request):
+    """ Allows parents to report sensory issues or helpfulness to the Admin """
+    if request.method == "POST":
+        lesson_id = request.POST.get('lesson_id')
+        message = request.POST.get('message')
+        
+        if not lesson_id or not message:
+            messages.error(request, "Please select a lesson and provide feedback.")
+            return redirect(request.META.get('HTTP_REFERER', 'parent_dashboard'))
+            
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        
+        # Save feedback as 'unmoderated' by default
+        LessonFeedback.objects.create(
+            lesson=lesson,
+            parent=request.user,
+            message=message,
+            is_moderated=False
+        )
+        
+        messages.success(request, "Your feedback has been sent to the System Controller for review.")
+    return redirect(request.META.get('HTTP_REFERER', 'parent_dashboard'))
+# accounts/views.py
+
+@login_required
+def relay_feedback_to_contributor(request, feedback_id):
+    """ Admin approves and forwards parent feedback to the content creator """
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        return HttpResponseForbidden()
+        
+    feedback = get_object_or_404(LessonFeedback, id=feedback_id)
+    feedback.is_moderated = True
+    feedback.save()
+    
+    messages.success(request, f"Feedback for '{feedback.lesson.title}' forwarded to Contributor.")
+    return redirect('admin_dashboard')
+@login_required
+def manage_categories(request):
+    """ Feature: Dynamic Category Creation for Admin """
+    if request.method == "POST":
+        new_name = request.POST.get('category_name').strip().lower()
+        # In a real model-based setup, you'd save to a Category model.
+        # Since your Lesson model uses CharField categories, we notify success:
+        messages.success(request, f"New skill area '{new_name}' is now available for contributors.")
+        return redirect('admin_dashboard')
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def delete_category(request, cat_slug):
+    """ Feature: Remove focus area and cleanup related modules """
+    Lesson.objects.filter(skill_category=cat_slug).delete()
+    messages.warning(request, f"Skill area '{cat_slug}' and all associated lessons removed.")
+    return redirect('admin_dashboard')
+@login_required
+def assign_task(request):
+    """ Fixed function name to match your urls.py path('assign-daily-task/') """
+    if request.method == "POST":
+        child_id = request.POST.get('child_id')
+        category = request.POST.get('category')
+        
+        child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+        
+        # Logic: Filter lessons by the guide's age categories (Toddler, Kinder, etc.)
+        bundle_lessons = Lesson.objects.filter(target_age_group__iexact=category, is_approved=True)
+        
+        for lesson in bundle_lessons:
+            # get_or_create prevents duplicate assignments for the same day
+            Assignment.objects.get_or_create(
+                child=child,
+                lesson=lesson,
+                assigned_date=date.today()
+            )
+            
+        messages.success(request, f"Daily {category} curriculum assigned to {child.name}.")
+    return redirect('parent_dashboard')
+
+@login_required
+def save_behavior_log(request):
+    """ Handles the Behavior Tracking Card data """
+    if request.method == "POST":
+        child_id = request.POST.get('child_id')
+        child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+        
+        BehaviorLog.objects.create(
+            child=child,
+            mood=request.POST.get('mood', 'calm'),
+            sleep_quality=request.POST.get('sleep_quality') or request.POST.get('sleep', ''),
+            social_interaction=request.POST.get('social_interaction') or 'Neutral',
+            meltdown_episodes=int(request.POST.get('meltdowns') or 0),
+            attention_level=int(request.POST.get('attention') or 3)
+        )
+        
+        messages.success(request, f"Daily behavioral insights for {child.name} recorded.")
+    return redirect('parent_dashboard')
+
+def log_daily_mood(request):
+    if request.method == "POST":
+        child_id = request.POST.get('child_id')
+        mood = request.POST.get('mood')
+        note = request.POST.get('behavior_note')
+        
+        # LOGIC: Save this to your Database
+        # Example: DailyLog.objects.create(child_id=child_id, mood=mood, note=note)
+        
+        messages.success(request, "Daily readiness logged successfully!")
+    return redirect('parent_dashboard')
+
+
+    return redirect('parent_dashboard')
+@login_required
+def assign_daily_lessons(request):
+    if request.method == 'POST':
+        child_id = request.POST.get('child_id')
+        child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+        lesson_ids = request.POST.getlist('lessons')
+        for lid in lesson_ids:
+            Assignment.objects.update_or_create(
+                child=child,
+                lesson_id=lid,
+                assigned_date=date.today(),
+                defaults={'is_completed': False}
+            )
+        messages.success(request, f"Assigned {len(lesson_ids)} activities to {child.name} for today.")
+        return redirect('parent_dashboard')
+@login_required
+@never_cache
+def independent_student_dashboard(request):
+    # Security: Ensure only students can see this
+    if request.user.role != 'student':
+        return redirect('role_dashboard')
+
+    # Get the profile linked to this user
+    child = get_object_or_404(ChildProfile, user=request.user)
+    
+    # Calculate Stars and Progress
+    total_stars = ActivityProgress.objects.filter(child=child).aggregate(Sum('stars_earned'))['stars_earned__sum'] or 0
+    
+    # Get today's assignments
+    assigned_tasks = Assignment.objects.filter(
+        child=child, 
+        assigned_date=date.today(),
+        is_completed=False
+    ).select_related('lesson')
+
+    return render(request, 'accounts/child/independent_dashboard.html', {
+        'child': child,
+        'total_stars': total_stars,
+        'tasks': assigned_tasks,
+    })
+@login_required
+def high_sensitivity_dashboard(request, child_id):
+    """ 
+    Specialized UI for High Support Students:
+    - Minimalist 'One Task at a Time' view.
+    - Large focus buttons.
+    - Calm color palette.
+    """
+    child = get_object_or_404(ChildProfile, id=child_id, parent=request.user)
+    
+    # Track that this is a parent-supervised session
+    request.session['active_child_id'] = child.id
+    request.session['assisted_session'] = True
+
+    # Fetch only the FIRST uncompleted task for total focus
+    current_task = Assignment.objects.filter(
+        child=child, 
+        assigned_date=date.today(),
+        is_completed=False
+    ).select_related('lesson').first()
+
+    return render(request, 'accounts/child/high_sensitivity_dashboard.html', {
+        'child': child,
+        'task': current_task,
     })

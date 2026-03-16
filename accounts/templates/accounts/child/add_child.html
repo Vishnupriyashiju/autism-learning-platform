@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}NeuroSkills | Create Student Profile{% endblock %}
+{% block title %}NeuroSkills | Clinical Registration{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -12,155 +12,140 @@
                     
                     <div class="col-md-4 d-none d-md-block position-relative">
                         <img src="{% static 'img/program-1.jpg' %}" class="w-100 h-100" style="object-fit: cover;" alt="Child Learning">
-                        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(240, 98, 146, 0.4); backdrop-filter: blur(2px);">
+                        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(240, 98, 146, 0.5); backdrop-filter: blur(2px);">
                             <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white p-4 text-center">
-                                <i class="fas fa-graduation-cap fa-3x mb-3"></i>
-                                <h3 class="fw-bold">Student Profile</h3>
-                                <p class="small">Precision profiles lead to better learning outcomes.</p>
+                                <i class="fas fa-stethoscope fa-3x mb-3"></i>
+                                <h3 class="fw-bold">Clinical Profiling</h3>
+                                <p class="small">Score dictates the adaptive access path for the student.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-md-8 bg-white p-5">
-                        <h2 class="text-dark fw-bold mb-4">Personalize the Journey</h2>
+                        <h2 class="text-dark fw-bold mb-4">Precision Registration</h2>
 
                         <form method="post" class="animate__animated animate__fadeIn">
                             {% csrf_token %}
 
-                            <div class="row g-3">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark small">STUDENT NAME</label>
-                                    <input class="form-control border-0 bg-light py-2" name="name" placeholder="Full Name" required>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold text-dark small">CHILD NAME</label>
+                                    <input class="form-control border-0 bg-light py-2 px-3" name="name" placeholder="Full Name" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark small">AGE</label>
-                                    <input class="form-control border-0 bg-light py-2" type="number" name="age" placeholder="Age" required>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold text-dark small">CHILD AGE</label>
+                                    <input class="form-control border-0 bg-light py-2 px-3" type="number" name="age" placeholder="Age" required>
                                 </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark small">LEARNING STYLE</label>
-                                    <select class="form-select border-0 bg-light py-2" name="learning_style">
-                                        <option value="visual">Visual (Videos/Images)</option>
-                                        <option value="audio">Auditory (Sound/Music)</option>
-                                        <option value="activity">Kinesthetic (Games/Touch)</option>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold text-dark small">GENDER</label>
+                                    <select class="form-select border-0 bg-light py-2 px-3" name="gender">
+                                        <option value="">Select</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark small">SENSORY MODE</label>
-                                    <select class="form-select border-0 bg-light py-2" name="sensory_mode">
-                                        <option value="low">Low Stimulation (Calm)</option>
-                                        <option value="high">High Engagement (Vibrant)</option>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold text-dark small">AUTISM LEVEL</label>
+                                    <select class="form-select border-0 bg-light py-2 px-3" name="autism_level">
+                                        <option value="">Select</option>
+                                        <option value="Mild">Mild</option>
+                                        <option value="Moderate">Moderate</option>
+                                        <option value="Severe">Severe</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold text-dark small">DIAGNOSIS TYPE</label>
+                                    <select class="form-select border-0 bg-light py-2 px-3" name="diagnosis_type">
+                                        <option value="">Select</option>
+                                        <option value="Autism">Autism</option>
+                                        <option value="ADHD">ADHD</option>
+                                        <option value="Both">Both</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold text-dark small">LEARNING STYLE</label>
+                                    <select class="form-select border-0 bg-light py-2 px-3" name="learning_style">
+                                        <option value="visual">Visual</option>
+                                        <option value="audio">Audio</option>
+                                        <option value="kinesthetic">Interactive</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <label class="form-label fw-bold text-dark small">CHILD INTERESTS</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="interests" value="Animals" id="i1"><label class="form-check-label small" for="i1">Animals</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="interests" value="Numbers" id="i2"><label class="form-check-label small" for="i2">Numbers</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="interests" value="Music" id="i3"><label class="form-check-label small" for="i3">Music</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="interests" value="Colors" id="i4"><label class="form-check-label small" for="i4">Colors</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="interests" value="Stories" id="i5"><label class="form-check-label small" for="i5">Stories</label></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <label class="form-label fw-bold text-dark small">SENSORY SENSITIVITY</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="sensory_sensitivity" value="Sound sensitive" id="s1"><label class="form-check-label small" for="s1">Sound sensitive</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="sensory_sensitivity" value="Light sensitive" id="s2"><label class="form-check-label small" for="s2">Light sensitive</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="sensory_sensitivity" value="Touch sensitive" id="s3"><label class="form-check-label small" for="s3">Touch sensitive</label></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label fw-bold text-dark small">SENSORY MODE (UI)</label>
+                                    <select class="form-select border-0 bg-light py-2 px-3" name="sensory_mode">
+                                        <option value="low">Low Stimulation (Calm UI)</option>
+                                        <option value="high">High Engagement (Vibrant UI)</option>
                                         <option value="neutral">Standard</option>
                                     </select>
                                 </div>
+                            </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark small">PRIMARY FOCUS AREA</label>
-                                    <input class="form-control border-0 bg-light py-2" name="diagnosis" placeholder="e.g. Social Skills, Communication">
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark small">REWARD SYSTEM</label>
-                                    <select class="form-select border-0 bg-light py-2" name="reward_pref">
-                                        <option value="stars">Star Badges</option>
-                                        <option value="points">Unlockable Activities</option>
-                                        <option value="visual">Visual Fireworks</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-12 mt-4">
-                                    <div class="p-4 rounded-4" style="background-color: #fff0f5; border: 1px dashed #f06292;">
-                                        <h5 class="fw-bold text-dark mb-1">
-                                            <i class="fas fa-clipboard-check text-pink me-2"></i>Developmental Screening
-                                        </h5>
-                                        <p class="text-muted small mb-4">Help us personalize the portal by answering these 5 questions.</p>
-
-                                        <div class="row">
-                                            <div class="col-md-6 mb-4">
-                                                <label class="form-label small fw-bold text-dark">1. Does the child maintain consistent eye contact?</label>
-                                                <div class="d-flex gap-4 mt-1">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q1" id="q1y" value="no" required>
-                                                        <label class="form-check-label small" for="q1y">Yes</label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q1" id="q1n" value="yes">
-                                                        <label class="form-check-label small" for="q1n">No</label>
-                                                    </div>
+                            <div class="col-12 mt-4">
+                                <div class="p-4 rounded-4" style="background-color: #fff0f5; border: 1px dashed #f06292;">
+                                    <h5 class="fw-bold text-dark mb-3">
+                                        <i class="fas fa-clipboard-check text-pink me-2"></i>Developmental Screening (10-Point)
+                                    </h5>
+                                    
+                                    <div class="row">
+                                        {% for q_text in screening_questions %}
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label small fw-bold text-dark">{{ q_text }}</label>
+                                            <div class="d-flex gap-3 mt-1">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="q{{ forloop.counter }}" id="q{{ forloop.counter }}y" value="yes" required>
+                                                    <label class="form-check-label small" for="q{{ forloop.counter }}y">Yes</label>
                                                 </div>
-                                            </div>
-
-                                            <div class="col-md-6 mb-4">
-                                                <label class="form-label small fw-bold text-dark">2. Does the child frequently repeat words/phrases?</label>
-                                                <div class="d-flex gap-4 mt-1">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q2" id="q2y" value="yes" required>
-                                                        <label class="form-check-label small" for="q2y">Yes</label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q2" id="q2n" value="no">
-                                                        <label class="form-check-label small" for="q2n">No</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 mb-4">
-                                                <label class="form-label small fw-bold text-dark">3. Does the child prefer solitary play?</label>
-                                                <div class="d-flex gap-4 mt-1">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q3" id="q3y" value="yes" required>
-                                                        <label class="form-check-label small" for="q3y">Yes</label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q3" id="q3n" value="no">
-                                                        <label class="form-check-label small" for="q3n">No</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 mb-4">
-                                                <label class="form-label small fw-bold text-dark">4. Intense reactions to specific sounds or lights?</label>
-                                                <div class="d-flex gap-4 mt-1">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q4" id="q4y" value="yes" required>
-                                                        <label class="form-check-label small" for="q4y">Yes</label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q4" id="q4n" value="no">
-                                                        <label class="form-check-label small" for="q4n">No</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 mb-4">
-                                                <label class="form-label small fw-bold text-dark">5. Is the child upset by changes in routine?</label>
-                                                <div class="d-flex gap-4 mt-1">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q5" id="q5y" value="yes" required>
-                                                        <label class="form-check-label small" for="q5y">Yes</label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="q5" id="q5n" value="no">
-                                                        <label class="form-check-label small" for="q5n">No</label>
-                                                    </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="q{{ forloop.counter }}" id="q{{ forloop.counter }}n" value="no">
+                                                    <label class="form-check-label small" for="q{{ forloop.counter }}n">No</label>
                                                 </div>
                                             </div>
                                         </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-12 mb-4 mt-2">
-                                    <label class="form-label fw-bold text-dark small">SENSORY TRIGGERS / NOTES</label>
-                                    <textarea class="form-control border-0 bg-light py-2" name="notes" rows="2" placeholder="List any triggers or special interests..."></textarea>
+                            <div class="col-12 my-4">
+                                <div class="p-4 rounded-4 bg-light border-start border-pink border-4">
+                                    <h5 class="fw-bold text-dark mb-1"><i class="fas fa-key text-pink me-2"></i>Independent Access</h5>
+                                    <p class="text-muted small mb-3">Login credentials for the student. Access will be locked if sensitivity > 50%.</p>
+                                    
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-dark small">STUDENT USERNAME</label>
+                                            <input type="text" class="form-control border-0 bg-white py-2 px-3 shadow-sm" name="student_username" placeholder="e.g. vishnu_2026" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-dark small">STUDENT PASSWORD</label>
+                                            <input type="password" class="form-control border-0 bg-white py-2 px-3 shadow-sm" name="student_password" placeholder="Create a simple password" required>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="d-flex gap-3">
-                                <button type="submit" class="btn btn-pink px-5 py-3 fw-bold rounded-pill shadow-sm w-100">
-                                    Create Profile & Complete Screening
-                                </button>
-                            </div>
+                            <button type="submit" class="btn btn-pink px-5 py-3 fw-bold rounded-pill shadow-sm w-100">
+                                SUBMIT CLINICAL PROFILE & VERIFY ACCESS
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -168,29 +153,12 @@
         </div>
     </div>
 </div>
-<div class="col-12 mb-4">
-    <div class="p-4 rounded-4 bg-light border">
-        <h5 class="fw-bold text-dark mb-1">
-            <i class="fas fa-key text-pink me-2"></i>Student Access Credentials
-        </h5>
-        <p class="text-muted small mb-3">Create a separate login for your child to access their portal independently.</p>
-        
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label fw-bold text-dark small">STUDENT USERNAME</label>
-                <input type="text" class="form-control border-0 bg-white py-2" name="student_username" placeholder="e.g. vishnu_2026" required>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label fw-bold text-dark small">STUDENT PASSWORD</label>
-                <input type="password" class="form-control border-0 bg-white py-2" name="student_password" placeholder="Create a simple password" required>
-            </div>
-        </div>
-    </div>
-</div>
+
 <style>
+    .bg-soft-pink { background-color: #fdf2f5; }
     .text-pink { color: #f06292 !important; }
     .btn-pink { background-color: #f06292; color: white; border: none; }
-    .btn-pink:hover { background-color: #ec407a; color: white; }
+    .btn-pink:hover { background-color: #ec407a; color: white; transform: translateY(-2px); transition: 0.3s; }
     .form-check-input:checked { background-color: #f06292; border-color: #f06292; }
 </style>
 {% endblock %}

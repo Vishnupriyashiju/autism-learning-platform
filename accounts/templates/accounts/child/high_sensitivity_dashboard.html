@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="high-support-zone">
+    <div class="container pt-4">
+        <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-pill shadow-sm">
+            <span class="ms-4 fw-bold text-muted small text-uppercase">Guided Session: {{ child.name }}</span>
+            <a href="{% url 'exit_child_gate' %}" class="btn btn-light rounded-pill px-4 btn-sm text-danger">
+                <i class="fas fa-times me-2"></i>Stop Session
+            </a>
+        </div>
+    </div>
+
+    <div class="container py-5 mt-3">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                
+                {% if task %}
+                    <div class="focus-card p-5 bg-white rounded-5 shadow-lg border-0 animate__animated animate__fadeIn">
+                        <div class="display-1 mb-4">🧩</div>
+                        <h1 class="display-5 fw-bold mb-3">Today's Focus</h1>
+                        <h2 class="text-pink mb-4">{{ task.lesson.title }}</h2>
+                        
+                        <p class="lead text-muted mb-5 px-md-5">
+                            We are going to learn something fun today! Just click the big pink button below to start.
+                        </p>
+
+                        <a href="{% url 'system_activity_player' task.lesson.id %}" 
+                           class="btn-giant-action">
+                            START ACTIVITY
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="focus-card p-5 bg-white rounded-5 shadow-lg animate__animated animate__fadeIn">
+                        <div class="display-1 mb-4">🌈</div>
+                        <h1 class="display-4 fw-bold">Great Job, {{ child.name }}!</h1>
+                        <p class="lead text-muted">You have finished all your tasks. Time to relax!</p>
+                        <a href="{% url 'exit_child_gate' %}" class="btn btn-pink rounded-pill px-5 py-3 mt-3 fw-bold">GO BACK</a>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Zen Styles: Soft colors to prevent sensory overload */
+    .high-support-zone {
+        background-color: #f0f4f7; /* Very soft grayish blue */
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .focus-card {
+        border: 1px solid #e1e8ed;
+        transition: none; /* No hover jitter for high sensitivity */
+    }
+
+    .btn-giant-action {
+        display: inline-block;
+        background: #f06292;
+        color: white;
+        padding: 30px 80px;
+        font-size: 2rem;
+        font-weight: 800;
+        border-radius: 100px;
+        text-decoration: none;
+        box-shadow: 0 15px 30px rgba(240, 98, 146, 0.2);
+        border: 8px solid rgba(255,255,255,0.3);
+    }
+
+    .btn-giant-action:hover {
+        background: #ec407a;
+        color: white;
+        transform: scale(1.02);
+    }
+
+    /* Remove heavy shadows and high-frequency patterns */
+    body { overflow-x: hidden; }
+</style>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Set Rewards | {{ child.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Reward System: {{ child.name }}</h2>
+            <p class="text-muted small mb-0">e.g. 10 stars → Chocolate, 20 stars → Toy, 50 stars → Park visit</p>
+        </div>
+        <a href="{% url 'child_list' %}" class="btn btn-outline-secondary rounded-pill px-4">Back to Profiles</a>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-gift text-pink me-2"></i>Add Reward</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{% url 'parent_reward_manage' child.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Stars required</label>
+                            <input type="number" name="stars_required" class="form-control rounded-4" min="1" placeholder="e.g. 10" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Reward description</label>
+                            <input type="text" name="reward_description" class="form-control rounded-4" placeholder="e.g. Chocolate / Toy / Park visit" required>
+                        </div>
+                        <button type="submit" class="btn btn-pink rounded-pill px-4 fw-bold">Add Reward</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-list text-pink me-2"></i>Current Rewards</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% for r in rewards %}
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <span><strong>{{ r.stars_required }}</strong> stars → {{ r.reward_description }}</span>
+                        <a href="{% url 'parent_reward_delete' r.id %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Remove this reward?');">Remove</a>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small mb-0">No rewards set yet. Add rewards above.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>.btn-pink { background-color: #f06292; color: white; border: none; } .btn-pink:hover { background-color: #ec407a; color: white; }</style>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Learning Plans | {{ child.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Learning Plans: {{ child.name }}</h2>
+            <p class="text-muted small mb-0">Daily, weekly, or custom plans with Skill, Activity, Duration.</p>
+        </div>
+        <div>
+            <a href="{% url 'child_list' %}" class="btn btn-outline-secondary rounded-pill px-4 me-2">Back</a>
+            <a href="{% url 'learning_plan_create' child.id %}" class="btn btn-pink rounded-pill px-4 fw-bold">+ Create Plan</a>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+            {% for plan in plans %}
+            <div class="border rounded-4 p-4 mb-3 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0">{{ plan.name }} <span class="badge bg-soft-pink text-pink rounded-pill">{{ plan.get_plan_type_display }}</span></h5>
+                    <small class="text-muted">{{ plan.created_at|date:"M d, Y" }}</small>
+                </div>
+                <ul class="mb-0">
+                    {% for item in plan.items.all %}
+                    <li><strong>{{ item.skill }}</strong>: {{ item.activity }} ({{ item.duration_minutes }} min)</li>
+                    {% empty %}
+                    <li class="text-muted">No items in this plan.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center py-5 mb-0">No learning plans yet. <a href="{% url 'learning_plan_create' child.id %}">Create one</a>.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>.btn-pink { background-color: #f06292; color: white; border: none; } .btn-pink:hover { background-color: #ec407a; color: white; } .bg-soft-pink { background-color: #fce4ec; } .text-pink { color: #f06292; }</style>
+{% endblock %}

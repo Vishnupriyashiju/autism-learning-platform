@@ -3,57 +3,145 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | NeuroSkills</title>
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 
     <style>
+        :root {
+            --pink-primary: #f06292;
+            --pink-grad: linear-gradient(45deg, #f06292, #ec407a);
+        }
+
         body {
             background: url("{% static 'img/about.jpg' %}") no-repeat center center fixed;
             background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .login-glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: var(--pink-grad);
+            padding: 40px 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .form-control {
+            border-radius: 15px;
+            padding: 12px 20px;
+            border: 1px solid #eee;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--pink-primary);
+            box-shadow: 0 0 0 4px rgba(240, 98, 146, 0.1);
+        }
+
+        .btn-login {
+            background: var(--pink-grad);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: 0.4s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(240, 98, 146, 0.3);
+            color: white;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -30px auto 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            color: var(--pink-primary);
+            font-size: 1.5rem;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container d-flex align-items-center justify-content-center" style="min-height:100vh;">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-lg border-0">
-                <div class="card-body p-4">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4 animate__animated animate__zoomIn">
+            <div class="login-glass-card">
+                <div class="login-header">
+                    <h3 class="fw-bold mb-0">NeuroSkills</h3>
+                    <small class="opacity-75">Empowering Every Mind</small>
+                </div>
 
-                    <h4 class="text-center mb-4">Login</h4>
+                <div class="card-body p-5 pt-0">
+                    <div class="icon-box">
+                        <i class="fas fa-lock"></i>
+                    </div>
+
+                    <h4 class="text-center fw-bold text-dark mb-4">Welcome Back</h4>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} small rounded-3">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
 
                     <form method="post">
                         {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted mb-1 ms-2">Username</label>
+                            <input type="text" name="username" class="form-control" placeholder="Enter your email" required>
+                        </div>
 
-                        <input type="text" name="username" class="form-control mb-3"
-                               placeholder="Username" required>
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-1 ms-2">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        </div>
 
-                        <input type="password" name="password" class="form-control mb-3"
-                               placeholder="Password" required>
-
-                        <button type="submit" class="btn btn-primary w-100 mb-3">
-                            Login
+                        <button type="submit" class="btn btn-login w-100 mb-4">
+                            SIGN IN <i class="fas fa-arrow-right ms-2 small"></i>
                         </button>
                     </form>
 
-                    <!-- Extra options -->
-                    <div class="text-center">
-                        <a href="#" class="d-block mb-2 text-decoration-none">
-                            Forgot password?
+                    <div class="text-center border-top pt-4">
+                        <a href="{% url 'password_reset' %}" class="d-block mb-2 text-decoration-none text-pink fw-bold small">
+                            Forgot your password?
                         </a>
-
-                        <span class="text-muted">Don’t have an account?</span>
-                        <a href="{% url 'register' %}" class="text-decoration-none">
-                            Create account
-                        </a>
+                        <p class="text-muted small">
+                            Don’t have an account? 
+                            <a href="{% url 'register' %}" class="text-pink fw-bold text-decoration-none">Create one here</a>
+                        </p>
                     </div>
-
                 </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="text-white text-decoration-none small opacity-75">
+                    <i class="fas fa-chevron-left me-1"></i> Back to Homepage
+                </a>
             </div>
         </div>
     </div>

@@ -16,32 +16,14 @@
                 </div>
                 
                 <ul class="nav flex-column gap-2 px-2" id="adminTabs" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active rounded-pill py-2" data-bs-toggle="tab" href="#overview" role="tab"><i class="fas fa-th-large me-3"></i>Overview</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#users-tab" role="tab"><i class="fas fa-users me-3"></i>User Directory</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#content-tab" role="tab">
-                            <i class="fas fa-file-medical me-3"></i>Content Queue 
-                            {% if pending_lessons.count > 0 %}
-                            <span class="badge rounded-pill bg-danger ms-1" style="font-size: 9px;">{{ pending_lessons.count }}</span>
-                            {% endif %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#module-management" role="tab"><i class="fas fa-cubes me-3"></i>Module Management</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#skill-tab" role="tab"><i class="fas fa-tags me-3"></i>Skill Categories</a>
-                    </li>
-                    <li class="nav-item mt-3">
-                        <a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#config-tab" role="tab"><i class="fas fa-cogs me-3"></i>Platform Config</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link rounded-pill py-2 text-dark" href="{% url 'view_analytics' %}"><i class="fas fa-chart-line me-3"></i>System Analysis</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link active rounded-pill py-2" data-bs-toggle="tab" href="#overview" role="tab"><i class="fas fa-th-large me-3"></i>Overview</a></li>
+                    <li class="nav-item"><a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#users-tab" role="tab"><i class="fas fa-users me-3"></i>User Directory</a></li>
+                    <li class="nav-item"><a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#content-tab" role="tab"><i class="fas fa-file-medical me-3"></i>Content Queue</a></li>
+                    <li class="nav-item"><a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#feedback-tab" role="tab"><i class="fas fa-comments-dollar me-3"></i>Parent Feedback</a></li>
+                    <li class="nav-item"><a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#module-management" role="tab"><i class="fas fa-cubes me-3"></i>Module Management</a></li>
+                    <li class="nav-item"><a class="nav-link rounded-pill py-2" data-bs-toggle="tab" href="#skill-tab" role="tab"><i class="fas fa-tags me-3"></i>Skill Categories</a></li>
+                    <li class="nav-item mt-3"><a class="nav-link rounded-pill py-2" href="{% url 'platform_config' %}"><i class="fas fa-cogs me-3"></i>Platform Config</a></li>
+                    <li class="nav-item"><a class="nav-link rounded-pill py-2 text-dark" href="{% url 'view_analytics' %}"><i class="fas fa-chart-line me-3"></i>System Analysis</a></li>
                 </ul>
             </div>
         </nav>
@@ -56,80 +38,86 @@
                     </div>
 
                     <div class="row g-4 mb-5 text-center">
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-pink border-4 h-100">
-                                <h3 class="text-pink fw-bold mb-0">{{ total_parents }}</h3>
-                                <small class="text-muted fw-bold">PARENTS REGISTERED</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-primary border-4 h-100">
-                                <h3 class="text-primary fw-bold mb-0">{{ total_contributors }}</h3>
-                                <small class="text-muted fw-bold">ACTIVE CONTRIBUTORS</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-success border-4 h-100">
-                                <h3 class="text-success fw-bold mb-0">{{ total_approved }}</h3>
-                                <small class="text-muted fw-bold">TOTAL LIVE USERS</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-danger border-4 h-100">
-                                <h3 class="text-danger fw-bold mb-0">{{ pending_lessons.count }}</h3>
-                                <small class="text-muted fw-bold">PENDING CONTENT</small>
-                            </div>
-                        </div>
+                        <div class="col-md-2"><div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-pink border-4 h-100"><h3 class="text-pink fw-bold mb-0">{{ total_parents }}</h3><small class="text-muted fw-bold">PARENTS</small></div></div>
+                        <div class="col-md-2"><div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-info border-4 h-100"><h3 class="text-info fw-bold mb-0">{{ total_children|default:0 }}</h3><small class="text-muted fw-bold">CHILDREN</small></div></div>
+                        <div class="col-md-2"><div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-primary border-4 h-100"><h3 class="text-primary fw-bold mb-0">{{ total_contributors }}</h3><small class="text-muted fw-bold">CONTRIBUTORS</small></div></div>
+                        <div class="col-md-2"><div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-success border-4 h-100"><h3 class="text-success fw-bold mb-0">{{ total_activities|default:0 }}</h3><small class="text-muted fw-bold">ACTIVITIES</small></div></div>
+                        <div class="col-md-2"><div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-warning border-4 h-100"><h3 class="text-warning fw-bold mb-0">{{ daily_active_users|default:0 }}</h3><small class="text-muted fw-bold">DAILY ACTIVE</small></div></div>
+                        <div class="col-md-2"><div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-danger border-4 h-100"><h3 class="text-danger fw-bold mb-0">{{ pending_lessons.count }}</h3><small class="text-muted fw-bold">NEW CONTENT</small></div></div>
                     </div>
 
-                    <div class="card border-0 shadow-sm rounded-4 p-4">
-                        <h5 class="fw-bold mb-3"><i class="fas fa-bullhorn text-pink me-2"></i>Multi-Role Broadcast</h5>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-bullhorn text-pink me-2"></i>System-Wide Broadcast</h5>
                         <form method="POST" action="{% url 'send_notifications' %}">
                             {% csrf_token %}
                             <div class="mb-3">
-                                <label class="small fw-bold text-muted mb-2">Target Roles:</label>
+                                <label class="small fw-bold text-muted mb-2">Target Audience:</label>
                                 <div class="d-flex gap-3">
                                     <div class="form-check"><input class="form-check-input" type="checkbox" name="target" value="parent" checked><label class="form-check-label">Parents</label></div>
                                     <div class="form-check"><input class="form-check-input" type="checkbox" name="target" value="contributor"><label class="form-check-label">Contributors</label></div>
                                 </div>
                             </div>
-                            <textarea name="message" class="form-control border-0 bg-light rounded-3 mb-3 p-3" rows="3" placeholder="Enter message..."></textarea>
-                            <button type="submit" class="btn btn-pink rounded-pill px-4 fw-bold">Dispatch Notification</button>
+                            <textarea name="message" class="form-control border-0 bg-light rounded-3 mb-3 p-3" rows="3" placeholder="Enter message to display on user dashboards..." required></textarea>
+                            <button type="submit" class="btn btn-pink rounded-pill px-4 fw-bold shadow-sm">Send Notification</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="tab-pane fade" id="users-tab" role="tabpanel">
-                    <h4 class="fw-bold mb-4">User Management Hub</h4>
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                        <div class="card-header bg-white py-3 border-bottom"><b>Registration Queue</b></div>
+                    <h4 class="fw-bold mb-4">Identity & Access Management</h4>
+                    
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 border-start border-warning border-4">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <b class="text-dark"><i class="fas fa-microscope text-pink me-2"></i>Pending Student Profiles</b>
+                            <span class="badge bg-soft-pink text-pink">{{ pending_student_profiles.count }} Awaiting Activation</span>
+                        </div>
                         <table class="table table-hover align-middle mb-0">
+                            <thead><tr><th class="ps-4">Student</th><th>Sensitivity</th><th>Parent</th><th class="text-end pe-4">Action</th></tr></thead>
                             <tbody>
-                                {% for u in pending_users %}
+                                {% for profile in pending_student_profiles %}
                                 <tr>
-                                    <td class="ps-4"><b>{{ u.first_name }}</b><br><small>{{ u.email }}</small></td>
-                                    <td><span class="badge bg-light text-dark">{{ u.role|upper }}</span></td>
+                                    <td class="ps-4"><b>{{ profile.name }}</b><br><small>@{{ profile.user.username }}</small></td>
+                                    <td><span class="badge {% if profile.autism_percentage >= 50 %}bg-danger{% else %}bg-info{% endif %} rounded-pill">{{ profile.autism_percentage }}%</span></td>
+                                    <td>{{ profile.parent.first_name }}</td>
                                     <td class="text-end pe-4">
-                                        <a href="{% url 'approve_user' u.id %}" class="btn btn-success btn-sm rounded-pill px-3 me-1">Approve</a>
-                                        <a href="{% url 'delete_user' u.id %}" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Reject user?')">Reject</a>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#studentPreview{{ profile.id }}">Preview</button>
+                                            <a href="{% url 'approve_student' profile.user.id %}" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">Activate</a>
+                                        </div>
                                     </td>
                                 </tr>
-                                {% empty %}
-                                <tr><td colspan="3" class="text-center py-4 text-muted small">No pending requests.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                        <div class="card-header bg-white py-3"><b>Active Directory</b></div>
+
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-start border-primary border-4">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <b class="text-dark"><i class="fas fa-user-plus text-primary me-2"></i>Professional Queue</b>
+                            <span class="badge bg-light text-primary border">{{ pending_users.count }} New Requests</span>
+                        </div>
                         <table class="table table-hover align-middle mb-0">
+                            <thead><tr><th class="ps-4">Photo</th><th>Name / Email</th><th>Role</th><th class="text-end pe-4">Action</th></tr></thead>
                             <tbody>
-                                {% for u in approved_users_list %}
+                                {% for u in pending_users %}
                                 <tr>
-                                    <td class="ps-4"><b>{{ u.first_name }}</b><br><small>{{ u.email }}</small></td>
-                                    <td><span class="badge bg-soft-pink text-pink">{{ u.role|upper }}</span></td>
+                                    <td class="ps-4">
+                                        {% if u.profile_photo %}
+                                            <img src="{{ u.profile_photo.url }}" class="rounded-circle shadow-sm" style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user text-muted small"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td><b>{{ u.first_name }}</b><br><small>{{ u.email }}</small></td>
+                                    <td><span class="badge bg-light text-dark border">{{ u.role|upper }}</span></td>
                                     <td class="text-end pe-4">
-                                        <a href="{% url 'delete_user' u.id %}" class="btn btn-link text-danger p-0 ms-3" onclick="return confirm('Permanently delete this user?')">Delete Account</a>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#userPreview{{ u.id }}">Preview</button>
+                                            <a href="{% url 'approve_user' u.id %}" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">Approve</a>
+                                            <a href="{% url 'delete_user' u.id %}" class="btn btn-outline-danger btn-sm rounded-pill" onclick="return confirm('Reject user?')"><i class="fas fa-times"></i></a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -139,57 +127,73 @@
                 </div>
 
                 <div class="tab-pane fade" id="content-tab" role="tabpanel">
-                    <h4 class="fw-bold mb-4">Content Moderation</h4>
+                    <h4 class="fw-bold mb-4">Content Moderation Hub</h4>
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                        <div class="card-header bg-white py-3 border-bottom"><b>Approval Queue</b></div>
                         <table class="table table-hover align-middle mb-0">
-                            <thead>
-                                <tr class="bg-light">
-                                    <th class="ps-4">Lesson Details</th>
-                                    <th>Revision Notes</th>
-                                    <th class="text-end pe-4">Action</th>
-                                </tr>
-                            </thead>
+                            <thead><tr class="bg-light"><th class="ps-4">Lesson Details</th><th>Preview</th><th>Moderation Notes</th><th class="text-end pe-4">Action</th></tr></thead>
                             <tbody>
                                 {% for lesson in pending_lessons %}
                                 <tr>
                                     <td class="ps-4"><b>{{ lesson.title }}</b><br><small>by {{ lesson.contributor.first_name }}</small></td>
-                                    <td>
-                                        <form method="POST" action="{% url 'approve_lesson' lesson.id %}" id="mod-form-{{ lesson.id }}">
-                                            {% csrf_token %}
-                                            <textarea name="admin_notes" class="form-control form-control-sm rounded-3" rows="2" placeholder="Notes if rejecting..."></textarea>
-                                    </td>
+                                    <td><a href="{% url 'system_activity_player' lesson.id %}?mode=view" target="_blank" class="btn btn-sm btn-light border rounded-pill"><i class="fas fa-eye text-pink me-1"></i> Preview Content</a></td>
+                                    <td><form method="POST" action="{% url 'approve_lesson' lesson.id %}">{% csrf_token %}<textarea name="admin_notes" class="form-control form-control-sm" rows="1" placeholder="Add notes..."></textarea></td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex gap-2 justify-content-end">
-                                            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm rounded-pill px-3">Publish</button>
-                                            <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-sm rounded-pill px-3">Revision</button>
+                                            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm rounded-pill">Publish</button>
+                                            <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-sm rounded-pill">Reject</button>
                                         </div>
                                         </form>
                                     </td>
                                 </tr>
-                                {% empty %}
-                                <tr><td colspan="3" class="text-center py-5 text-muted small">Queue is empty.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
+                <div class="tab-pane fade" id="feedback-tab" role="tabpanel">
+                    <h4 class="fw-bold mb-4">Relay Insights to Contributors</h4>
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-start border-pink border-4">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <b class="text-dark"><i class="fas fa-comment-dots text-pink me-2"></i>Incoming Parent Requests</b>
+                            <span class="badge bg-soft-pink text-pink rounded-pill px-3">{{ pending_feedback.count }} New</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr><th class="ps-4">Parent & Module</th><th>Observation/Request</th><th class="text-end pe-4">Action</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for feed in pending_feedback %}
+                                    <tr>
+                                        <td class="ps-4"><b>{{ feed.parent.first_name|default:feed.parent.username }}</b><br><small class="text-muted">On: {{ feed.lesson.title }}</small></td>
+                                        <td><div class="small p-3 bg-light rounded-3 border-start border-3 border-pink shadow-sm">"{{ feed.message }}"</div></td>
+                                        <td class="text-end pe-4">
+                                            <a href="{% url 'relay_feedback_to_contributor' feed.id %}" class="btn btn-pink btn-sm rounded-pill px-4 fw-bold shadow-sm"><i class="fas fa-paper-plane me-1"></i> Relay to Creator</a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="3" class="text-center py-5 text-muted">No new feedback.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="tab-pane fade" id="module-management" role="tabpanel">
-                    <h4 class="fw-bold mb-4">Module Management (Process 1.0.2)</h4>
+                    <h4 class="fw-bold mb-4">Ecosystem Modules</h4>
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                         <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr><th class="ps-4">Lesson Module</th><th>Category</th><th>Action</th></tr>
-                            </thead>
+                            <thead class="bg-light"><tr><th class="ps-4">Title</th><th>Category</th><th class="text-end pe-4">Action</th></tr></thead>
                             <tbody>
                                 {% for lesson in approved_lessons %}
                                 <tr>
                                     <td class="ps-4"><b>{{ lesson.title }}</b></td>
-                                    <td>{{ lesson.skill_category|title }}</td>
+                                    <td><span class="badge bg-soft-pink text-pink">{{ lesson.skill_category|title }}</span></td>
                                     <td class="text-end pe-4">
-                                        <a href="{% url 'request_module_update' lesson.id %}" class="btn btn-sm btn-light rounded-pill px-3 me-2">Request Update</a>
-                                        <a href="{% url 'delete_module' lesson.id %}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Delete this module?')"><i class="fas fa-trash"></i></a>
+                                        <a href="{% url 'request_module_update' lesson.id %}" class="btn btn-sm btn-light rounded-pill px-3">Revise</a>
+                                        <a href="{% url 'delete_module' lesson.id %}" class="text-danger ms-3" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -200,36 +204,31 @@
 
                 <div class="tab-pane fade" id="skill-tab" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">Focus Areas</h4>
-                        <button class="btn btn-pink rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addCategoryModal">+ New Skill</button>
+                        <h4 class="fw-bold">Focus Areas</h4>
+                        <button class="btn btn-pink rounded-pill px-4" data-bs-toggle="collapse" data-bs-target="#addSkillBox">+ Add Skill</button>
+                    </div>
+                    <div class="collapse mb-4" id="addSkillBox">
+                        <div class="card card-body border-0 shadow-sm rounded-4">
+                            <form method="POST" action="{% url 'manage_categories' %}">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-md-8"><input type="text" name="category_name" class="form-control rounded-pill" placeholder="Category Name..." required></div>
+                                    <div class="col-md-4"><button type="submit" class="btn btn-success w-100 rounded-pill">Create Category</button></div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                     <div class="row g-3">
                         {% for cat in categories %}
                         <div class="col-md-4">
                             <div class="card border-0 shadow-sm p-4 rounded-4 text-center position-relative">
-                                <button type="button" class="btn btn-link text-danger position-absolute top-0 end-0 m-2 p-0" 
-                                        style="font-size: 1.2rem;" onclick="return confirm('Delete this entire skill area?');">
-                                    <i class="fas fa-times-circle"></i>
-                                </button>
+                                <a href="{% url 'delete_category' cat.skill_category %}" class="position-absolute top-0 end-0 m-3 text-muted" onclick="return confirm('Delete category?')"><i class="fas fa-times-circle"></i></a>
                                 <i class="fas fa-brain fa-2x text-pink mb-3"></i>
-                                <h6 class="fw-bold mb-3">{{ cat.name }}</h6>
-                                <a href="{% url 'skill_lessons' cat.slug %}" class="btn btn-sm btn-outline-pink rounded-pill px-4">Manage Skill</a>
+                                <h6 class="fw-bold mb-1">{{ cat.skill_category|title }}</h6>
+                                <small class="text-muted">{{ cat.count }} Modules</small>
                             </div>
                         </div>
                         {% endfor %}
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="config-tab" role="tabpanel">
-                    <h4 class="fw-bold mb-4">Platform Configuration</h4>
-                    <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
-                        <i class="fas fa-tools fa-3x text-pink mb-4"></i>
-                        <h5 class="fw-bold">Ecosystem Settings</h5>
-                        <p class="text-muted">Manage system-wide parameters, security protocols, and integration keys.</p>
-                        <div class="d-grid gap-2 col-md-4 mx-auto mt-4">
-                            <button class="btn btn-pink rounded-pill">Update API Keys</button>
-                            <button class="btn btn-outline-pink rounded-pill">Maintenance Mode</button>
-                        </div>
                     </div>
                 </div>
 
@@ -238,28 +237,11 @@
     </div>
 </div>
 
-<div class="modal fade" id="addCategoryModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4">
-            <div class="modal-header border-0 pb-0"><h5 class="fw-bold">Create New Skill</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form action="#" method="POST">
-                {% csrf_token %}
-                <div class="modal-body p-4"><input type="text" name="name" class="form-control rounded-pill border-2 p-2 px-3" placeholder="Skill Name" required></div>
-                <div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-pink rounded-pill px-4">Add Skill Area</button></div>
-            </form>
-        </div>
-    </div>
-</div>
-
-
-
 <style>
-    .sidebar { z-index: 100; top: 0; left: 0; border-right: 1px solid #eee; }
+    .sidebar { z-index: 100; border-right: 1px solid #eee; }
     .bg-soft-pink { background-color: rgba(240, 98, 146, 0.1); }
     .text-pink { color: #f06292 !important; }
     .btn-pink { background-color: #f06292; color: white; border: none; }
-    .nav-link { color: #555; transition: 0.3s; font-weight: 500; border-radius: 50px !important; }
-    .nav-link:hover { background-color: rgba(240, 98, 146, 0.05); color: #f06292; }
     .nav-link.active { background-color: rgba(240, 98, 146, 0.15) !important; color: #f06292 !important; }
 </style>
 {% endblock %}

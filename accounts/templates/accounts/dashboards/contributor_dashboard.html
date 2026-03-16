@@ -13,6 +13,26 @@
 </div>
 
 <div class="container">
+    <div class="mb-4">
+        {% for note in user.notifications.all|dictsortreversed:"created_at"|slice:":2" %}
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-2 animate__animated animate__fadeInLeft" 
+             style="background: linear-gradient(90deg, #fce4ec 0%, #ffffff 100%); border-right: 4px solid #f06292;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white p-2 rounded-circle me-3 shadow-sm">
+                        <i class="fas fa-bell text-pink"></i>
+                    </div>
+                    <div>
+                        <span class="text-dark fw-bold small d-block">{{ note.message }}</span>
+                        <small class="text-muted" style="font-size: 9px;">{{ note.created_at|timesince }} ago</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close small" data-bs-dismiss="alert" style="font-size: 10px;"></button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
     <div class="row g-4 mb-5 text-center">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm p-3 rounded-4 bg-white border-bottom border-pink border-4 h-100">
