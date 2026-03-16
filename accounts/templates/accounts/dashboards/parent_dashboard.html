@@ -60,7 +60,7 @@
                             {% for child in children %}
                                 <li>
                                     {% if child.autism_percentage < 50 %}
-                                        {% if not child.user.is_approved %}
+                                        {% if not child.is_approved %}
                                             <div class="dropdown-item py-3 rounded-3 d-flex justify-content-between align-items-center opacity-75 bg-light">
                                                 <span>⏳ {{ child.name }}</span>
                                                 <span class="badge rounded-pill bg-secondary text-white px-2" style="font-size: 0.6rem;">Awaiting Admin</span>
@@ -74,9 +74,9 @@
                                         {% endif %}
                                     {% else %}
                                         <a class="dropdown-item py-3 rounded-3 d-flex justify-content-between align-items-center" 
-                                           href="{% url 'high_sensitivity_dashboard' child.id %}">
+                                           href="{% url 'child_login_redirect' child.id %}">
                                             <span>🚀 {{ child.name }}</span>
-                                            <span class="badge rounded-pill bg-warning text-dark px-2" style="font-size: 0.6rem;">High Support Zone</span>
+                                            <span class="badge rounded-pill bg-warning text-dark px-2" style="font-size: 0.6rem;">High Support</span>
                                         </a>
                                     {% endif %}
                                 </li>
@@ -117,7 +117,7 @@
 <div class="container pb-5">
     <div class="row g-4 mt-4">
         <div class="col-lg-6">
-            <div class="card border-0 shadow-sm rounded-5 overflow-hidden h-100">
+            <div class="card border-0 shadow-sm rounded-5 overflow-hidden">
                 <div class="card-header bg-white py-4 px-4 border-bottom">
                     <h5 class="fw-bold text-dark mb-0"><i class="fas fa-notes-medical text-pink me-2"></i>1. Daily Clinical Sync</h5>
                 </div>
@@ -155,24 +155,24 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-pink w-100 rounded-pill fw-bold mt-4 py-2 shadow-sm">SAVE LOG</button>
+                        <button type="submit" class="btn btn-pink w-100 rounded-pill fw-bold mt-4 py-2">SAVE LOG</button>
                     </form>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-6">
-            <div class="card border-0 shadow-sm rounded-5 border-top border-5 border-pink h-100">
+            <div class="card border-0 shadow-sm rounded-5 border-top border-5 border-pink">
                 <div class="card-header bg-white py-4 px-4 border-bottom">
                     <h5 class="fw-bold text-dark mb-0"><i class="fas fa-tasks text-pink me-2"></i>2. Assign Daily Curriculum</h5>
                 </div>
-                <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+                <div class="card-body p-4 text-center">
                     <form method="POST" action="{% url 'assign_daily_lessons' %}">
                         {% csrf_token %}
                         <select name="child_id" class="form-select border-2 rounded-4 mb-3" required>
                             {% for child in children %}<option value="{{ child.id }}">{{ child.name }}</option>{% endfor %}
                         </select>
-                        <p class="small text-muted mb-4">Activate recommended 12-Chapter sequence based on the child's age group and learning style.</p>
+                        <p class="small text-muted mb-4">Activate recommended 12-Chapter sequence based on the child's age group.</p>
                         <button type="submit" class="btn btn-pink btn-lg w-100 rounded-pill fw-bold shadow-sm">ACTIVATE DAILY PATH</button>
                     </form>
                 </div>
@@ -185,7 +185,7 @@
             <i class="fas fa-comment-medical text-pink fa-2x me-3"></i>
             <div>
                 <h5 class="fw-bold text-dark mb-0">System Controller Feedback</h5>
-                <small class="text-muted">Report sensory triggers or milestone successes directly to the Admin.</small>
+                <small class="text-muted">Report sensory triggers or milestone successes directly.</small>
             </div>
         </div>
         <div class="card-body p-4 p-lg-5">
@@ -194,7 +194,7 @@
                 <div class="row g-4">
                     <div class="col-md-5">
                         <label class="form-label fw-bold text-dark small text-uppercase">1. Reference Activity</label>
-                        <select name="lesson_id" class="form-select border-2 rounded-4 p-3 shadow-sm" required>
+                        <select name="lesson_id" class="form-select border-2 rounded-4 p-3" required>
                             <option value="" disabled selected>Which activity triggered this report?</option>
                             {% for lesson in approved_lessons %}
                                 <option value="{{ lesson.id }}">{{ lesson.title }} ({{ lesson.skill_category|title }})</option>
@@ -218,7 +218,7 @@
 
                     <div class="col-12">
                         <label class="form-label fw-bold text-dark small text-uppercase">3. Message to Admin</label>
-                        <textarea name="message" class="form-control border-2 rounded-4 p-3 shadow-sm" rows="3" 
+                        <textarea name="message" class="form-control border-2 rounded-4 p-3" rows="3" 
                                   placeholder="Provide specific details for the System Controller..." required></textarea>
                     </div>
 
@@ -237,23 +237,16 @@
     .bg-soft-pink { background-color: #fce4ec; }
     .text-pink { color: #f06292 !important; }
     .btn-pink { background-color: #f06292; color: white; border: none; transition: 0.3s; }
-    .btn-pink:hover { background-color: #ec407a; color: white; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(240, 98, 146, 0.4); }
-    .btn-outline-pink { color: #f06292; border: 2px solid #f06292; transition: 0.3s; }
+    .btn-pink:hover { background-color: #ec407a; color: white; transform: translateY(-2px); }
+    .btn-outline-pink { color: #f06292; border: 2px solid #f06292; }
     .btn-outline-pink:hover { background-color: #f06292; color: white; }
     .rounded-5 { border-radius: 2rem !important; }
-    .shadow-sm { box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important; }
 </style>
 
 <script>
-/**
- * handlePortalLaunch
- * Standard redirection logic for independent learners.
- * Prompts parent before moving to the central login gate.
- */
 function handlePortalLaunch(childName) {
     const message = `Student Profile "${childName}" has Independent Direct Access enabled.\n\nWould you like to redirect to the Student Login page for password verification?`;
     if (confirm(message)) {
-        // Redirect to central login page so Hanna can enter her own credentials
         window.location.href = "{% url 'login' %}";
     }
 }
